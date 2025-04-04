@@ -1,0 +1,11 @@
+JavaScript:
+  variables: camelCase
+  functions or methods: camelCase
+  Global and constants: SCREAMING_SNAKE_CASE
+  classes: PascalCase
+  files: snake_case
+
+Vue:
+  Component: PascalCase , preferably multiword
+  props: camelCase
+  refs: kebab-case
