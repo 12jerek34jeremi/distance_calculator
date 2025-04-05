@@ -1,7 +1,7 @@
 <script setup>
 import { useTemplateRef, ref } from 'vue'
 import GeoPoint from '@/models/geo_point.js'
-import TemporaryCom from '@/components/TemporaryCom.vue'
+import GeoInput from '@/components/GeoInput.vue'
 
 const geoInputA = useTemplateRef('point-a')
 const geoInputB = useTemplateRef('point-b')
@@ -30,8 +30,8 @@ function calculateDistance(){
 
 <template>
   <div><span>Type the two points positions:</span></div>
-  <TemporaryCom ref="point-a" label-text="Point A"></TemporaryCom>
-  <TemporaryCom ref="point-b" label-text="Point B"></TemporaryCom>
+  <GeoInput ref="point-a" label-text="Point A"></GeoInput>
+  <GeoInput ref="point-b" label-text="Point B"></GeoInput>
   <div><button @click="calculateDistance">Calculate Distans</button></div>
   <div v-show="showDistance">
     <div><span>Distance</span></div>
