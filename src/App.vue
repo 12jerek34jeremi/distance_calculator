@@ -1,31 +1,28 @@
 <script setup>
 import { useTemplateRef, ref } from 'vue'
-import Coordinate from '@/models/coordinate.js'
-import GeoPoint from './components/GeoPoint.vue'
+import GeoPoint from '@/models/geo_point.js'
+import TemporaryCom from '@/components/TemporaryCom.vue'
 
-const pointA = useTemplateRef('point-a')
-const pointB = useTemplateRef('point-b')
+const geoInputA = useTemplateRef('point-a')
+const geoInputB = useTemplateRef('point-b')
 const showDistance = ref(false)
 const distance = ref(0)
 
 function calculateDistance(){
-  let coordinateA = pointA.value.getPosition()
-  if(coordinateA === null){
+  let pointA = geoInputA.value.getPosition()
+  if(pointA === null){
     showDistance.value  = false;
-    console.log('A is null')
   }
-  let coordinateB = pointB.value.getPosition()
-  if(coordinateB === null){
+  let pointB = geoInputB.value.getPosition()
+  if(pointB === null){
     showDistance.value  = false;
-    console.log('B is null')
   }
 
-  if(coordinateA === null || coordinateB === null){
+  if(pointA === null || pointB === null){
     return;
   }
-  distance.value = Coordinate.calculateDistance(coordinateA, coordinateB);
-  console.log(distance.value)
-  console.log('dziala')
+
+  distance.value = GeoPoint.calculateDistance(pointB, pointA);
   showDistance.value  = true;
 }
 
@@ -33,8 +30,8 @@ function calculateDistance(){
 
 <template>
   <div><span>Type the two points positions:</span></div>
-  <GeoPoint ref="point-a" label-text="Point A"></GeoPoint>
-  <GeoPoint ref="point-b" label-text="Point B"></GeoPoint>
+  <TemporaryCom ref="point-a" label-text="Point A"></TemporaryCom>
+  <TemporaryCom ref="point-b" label-text="Point B"></TemporaryCom>
   <div><button @click="calculateDistance">Calculate Distans</button></div>
   <div v-show="showDistance">
     <div><span>Distance</span></div>

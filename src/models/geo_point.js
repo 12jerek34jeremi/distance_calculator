@@ -2,7 +2,7 @@ function deg2rad(deg) {
   return deg * (Math.PI/180)
 }
 
-class Coordinate {
+class GeoPoint {
   constructor(lat, lon) {
     this.lat = lat; // N +, S -
     this.lon = lon; // N +, S -
@@ -23,4 +23,4 @@ class Coordinate {
   }
 }
 
-export default Coordinate;
+export default GeoPoint;
