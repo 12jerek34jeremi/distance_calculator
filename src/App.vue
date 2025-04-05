@@ -10,15 +10,17 @@ const distance = ref(0)
 
 function calculateDistance(){
   let coordinateA = pointA.value.getPosition()
-  if(coordinateA == null){
+  if(coordinateA === null){
     showDistance.value  = false;
     console.log('A is null')
-    return;
   }
   let coordinateB = pointB.value.getPosition()
-  if(coordinateB == null){
+  if(coordinateB === null){
     showDistance.value  = false;
     console.log('B is null')
+  }
+
+  if(coordinateA === null || coordinateB === null){
     return;
   }
   distance.value = Coordinate.calculateDistance(coordinateA, coordinateB);
