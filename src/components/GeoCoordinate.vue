@@ -1,50 +1,60 @@
 <script setup>
   import { ref } from 'vue'
+  import {formatCoordinate,parseCoordinate} from '@/models/utils.js'
 
   const props = defineProps({
     whichAxis: String,
   });
 
+  let form = 'd';
 
   const whichAxis = props.whichAxis;
-  const regEx = (whichAxis == 'lat') ? 
-      /^(\d{1,2})(?:[.,](\d+))?\s*([sSnN])$/ : 
-      /^(\d{1,3})(?:[.,](\d+))?\s*([eEwW])$/;
   const positionText = ref('');
   const displayError = ref(false);
   const displayEmpty = ref(false);
 
-  function checkCoordinate(parse=true) {
+
+  function getCoordinate() {
     let text = positionText.value.trim();
+
     if (text == ''){
       displayError.value = false;
       displayEmpty.value = true;
       return null
     }
-    displayEmpty.value = false;
 
-    const match = text.match(regEx);
-    if (match === null){
+    const coordinate = parseCoordinate(text, whichAxis, form)
+
+    console.log('coordinate', coordinate)
+
+    if (coordinate == null){
       displayError.value = true;
-      return null
-    }
-    displayError.value = false;
-
-    const degrees = match[1];
-    const fraction = match[2] ?? '0';
-    const sense = match[3].toUpperCase();
-
-    positionText.value = `${degrees}.${fraction} ${sense}`;
-
-    if (parse) {
-      const absValue = parseFloat(`${degrees}.${fraction}`);
-      return (sense == 'N' || sense == 'E') ? absValue : -absValue;
-    } else {
+      displayEmpty.value = false;
       return null;
     }
+
+    displayError.value = false;
+    displayEmpty.value = false;
+    positionText.value = coordinate[1];
+
+    return coordinate[0];
   }
 
-defineExpose({checkCoordinate});
+  function changeForm(newForm){
+    const oldForm = form;
+    form = newForm;
+    displayEmpty.value = false;
+    displayError.value = false;
+
+    let text = positionText.value.trim();
+    if (text == '') return;
+
+    const coordinate = parseCoordinate(text, whichAxis, oldForm)
+    if(coordinate == null) return;
+    positionText.value = formatCoordinate(coordinate[0], whichAxis, newForm)
+  }
+
+defineExpose({getCoordinate, changeForm});
 
 </script>
 
@@ -53,15 +63,15 @@ defineExpose({checkCoordinate});
     <div>
       <div>
         <input
-          @blur="checkCoordinate(parse=true)"
+          @blur="getCoordinate(parse=true)"
           type="text"
           v-model="positionText"
-          :placeholder="(whichAxis == 'lat') ? '52.2074648 N' : '20.915066 E'"
+          :placeholder="(whichAxis == 'lat') ? '52.207465 N' : '20.915066 E'"
         />
       </div>
       <div>
         <span v-show="displayError">The above is not valid cordinate!</span>
-        <span v-show="displayEmpty">Cordinate is empty!</span>
+        <span v-show="displayEmpty">Insert a cordinate!</span>
       </div>
     </div>
   </div>

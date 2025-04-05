@@ -11,17 +11,22 @@ import { useTemplateRef } from 'vue'
   const lonCom = useTemplateRef('lon');
 
   function getPosition() {
-    const lat = latCom.value.checkCoordinate();
-    const lon = lonCom.value.checkCoordinate();
+    const lat = latCom.value.getCoordinate();
+    const lon = lonCom.value.getCoordinate();
 
     if (isNaN(lat) || isNaN(lon)) {
       return null;
     }
 
     return new GeoPoint(lat, lon);
-}
+  }
 
-defineExpose({getPosition});
+  function changeForm(newForm) {
+    latCom.value.changeForm(newForm);
+    lonCom.value.changeForm(newForm);
+  }
+
+  defineExpose({getPosition, changeForm});
 
 </script>
 
