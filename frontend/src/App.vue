@@ -57,7 +57,7 @@ function sendToCalculate(){
     <GeoInput ref="point-a" label-text="Point A" initial-form="d" />
     <GeoInput ref="point-b" label-text="Point B" initial-form="d" />
 
-    <div class="buttonContainer">
+    <div class="button-container">
       <div v-show="loading" class="loading">
         <p>Calculating...</p>
       </div>
@@ -66,11 +66,20 @@ function sendToCalculate(){
         <button @click="sendToCalculate">Calculate Distance</button>
       </div>
     </div>
-
-    <div v-show="showDistance" class="result">
-      <div><strong>Distance</strong></div>
-      <div><span>Meters:</span> {{ Math.round(distance) }}</div>
-      <div><span>Kilometers:</span> {{ Math.round(distance / 1000) }}</div>
+    <div class="result-placeholder">
+      <div v-show="showDistance" class="result">
+        <div><strong>Distance</strong></div>
+        <div><span>Meters:</span> {{ Math.round(distance) }}</div>
+        <div><span>Kilometers:</span> {{ Math.round(distance / 1000) }}</div>
+      </div>
+    </div>
+    <div class="info-note">
+      <p>
+        You can use <strong>d</strong>, <strong>D</strong>, or <strong>°</strong> for degrees;
+        <strong>m</strong>, <strong>M</strong>, or <strong>"</strong> for minutes;
+        and <strong>s</strong>, <strong>S</strong>, or <strong>'</strong> for seconds.
+        <strong>Spaces are optional.</strong>
+      </p>
     </div>
   </div>
 </template>
@@ -92,7 +101,7 @@ function sendToCalculate(){
   margin-bottom: 1rem;
   text-align: center;
 }
-.newDiv {
+.button-container {
   min-height: 3rem;
 }
 
@@ -116,6 +125,9 @@ button:hover {
   background-color: #e0e0e0;
 }
 
+.result-placeholder{
+  min-height: 4rem;
+}
 
 .result {
   margin-top: 1rem;
