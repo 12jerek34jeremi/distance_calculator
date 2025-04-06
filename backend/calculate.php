@@ -36,7 +36,5 @@
   
   $distance = calculateDistance($latA, $lonA, $latB, $lonB);
   echo round($distance);
-
-  sleep(3);
 ?>
 

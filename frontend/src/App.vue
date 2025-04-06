@@ -51,21 +51,88 @@ function sendToCalculate(){
 </script>
 
 <template>
-  <div><span>Type the two points positions:</span></div>
-  <GeoInput ref="point-a" label-text="Point A" initial-form="d"></GeoInput>
-  <GeoInput ref="point-b" label-text="Point B" initial-form="d"></GeoInput>
-  <div  v-show="loading">
-    <p>Calculating...</p>
-  </div>
-  <div v-show="!loading">
-    <button @click="sendToCalculate">Calculate Distans</button>
-  </div>
-  <div v-show="showDistance">
-    <div><span>Distance</span></div>
-    <div><span>meters: </span>{{Math.round(distance)}}</div>
-    <div><span>kilometers: </span>{{ Math.round(distance/1000)}}</div>
+  <div class="distance-calculator">
+    <div><h2 class="title">Type the two points positions:</h2></div>
+
+    <GeoInput ref="point-a" label-text="Point A" initial-form="d" />
+    <GeoInput ref="point-b" label-text="Point B" initial-form="d" />
+
+    <div class="buttonContainer">
+      <div v-show="loading" class="loading">
+        <p>Calculating...</p>
+      </div>
+
+      <div v-show="!loading" class="action">
+        <button @click="sendToCalculate">Calculate Distance</button>
+      </div>
+    </div>
+
+    <div v-show="showDistance" class="result">
+      <div><strong>Distance</strong></div>
+      <div><span>Meters:</span> {{ Math.round(distance) }}</div>
+      <div><span>Kilometers:</span> {{ Math.round(distance / 1000) }}</div>
+    </div>
   </div>
 </template>
 
+
 <style scoped>
+.distance-calculator {
+  margin: 0 auto;
+  padding: 1rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+.newDiv {
+  min-height: 3rem;
+}
+
+.loading p {
+  font-style: italic;
+  color: #555;
+  margin: 0;
+}
+
+button {
+  padding: 0.5rem 1rem;
+  font-size: 0.95rem;
+  border: 1px solid #333;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+button:hover {
+  background-color: #e0e0e0;
+}
+
+
+.result {
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 1rem;
+}
+
+.result span {
+  font-weight: 600;
+}
+@media (max-width: 500px) {
+.title {
+  font-size: 1.0rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+}
 </style>
+

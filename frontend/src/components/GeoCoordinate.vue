@@ -84,23 +84,51 @@
 </script>
 
 <template>
-  <div>
-    <div>
-      <div>
-        <input
-          @blur="getCoordinate(parse=true)"
-          type="text"
-          v-model="positionText"
-          :placeholder="placeholderText"
-        />
-      </div>
-      <div>
-        <span v-show="displayError">The above is not valid cordinate!</span>
-        <span v-show="displayEmpty">Insert a cordinate!</span>
-      </div>
+  <div class="input-container">
+    <input
+      @blur="getCoordinate(parse=true)"
+      type="text"
+      v-model="positionText"
+      :placeholder="placeholderText"
+      class="input-field"
+    />
+    <div class="error-message-box">
+      <p v-show="displayError" class="error-text">The above is not a valid coordinate!</p>
+      <p v-show="displayEmpty" class="error-text">Insert a coordinate!</p>
     </div>
   </div>
 </template>
 
 <style scoped>
+.coordinate-container {
+  margin: 0.75rem auto;
+}
+
+.input-field {
+  width: 90%;
+  padding: 8px 10px;
+  font-size: 0.95rem;
+  border: 1.5px solid #ccc;
+  border-radius: 5px;
+  transition: border-color 0.3s ease;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: #007BFF;
+  box-shadow: 0 0 3px rgba(0, 123, 255, 0.4);
+}
+
+.error-message-box {
+  min-height: 20px;
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+
+.error-text {
+  color: #d9534f;
+  font-size: 0.85rem;
+  margin: 0;
+  transition: opacity 0.2s ease-in-out;
+}
 </style>
