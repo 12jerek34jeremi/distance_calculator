@@ -6,9 +6,21 @@ import GeoInput from '@/components/GeoInput.vue'
 const geoInputA = useTemplateRef('point-a');
 const geoInputB = useTemplateRef('point-b');
 const showDistance = ref(false);
+const loading = ref(false);
 const distance = ref(0);
 
-function calculateDistance(){
+
+function displayDistans(responseText) {
+  if(responseText == 'error'){console.log('error 1'); return;}
+  let receivedDistance = parseInt(responseText);
+  if(receivedDistance == NaN){console.log('error 2'); return;}
+  
+  distance.value = receivedDistance;
+  showDistance.value = true;
+  loading.value = false;
+}
+
+function sendToCalculate(){
   let pointA = geoInputA.value.getPosition()
   if(pointA === null){
     showDistance.value  = false;
@@ -22,8 +34,18 @@ function calculateDistance(){
     return;
   }
 
-  distance.value = GeoPoint.calculateDistance(pointB, pointA);
-  showDistance.value  = true;
+  loading.value = true;
+  showDistance.value = false;
+  distance.value = -1;
+
+  const params = `lat-a=${pointA.lat}&lon-a=${pointA.lon}&lat-b=${pointB.lat}&lon-b=${pointB.lon}`
+  const url = `/api/calculate.php?${params}`
+  const request = new XMLHttpRequest();
+  request.onload = function(){
+    displayDistans(this.responseText);
+  }
+  request.open('GET', url, true);
+  request.send();
 }
 
 </script>
@@ -32,7 +54,12 @@ function calculateDistance(){
   <div><span>Type the two points positions:</span></div>
   <GeoInput ref="point-a" label-text="Point A"></GeoInput>
   <GeoInput ref="point-b" label-text="Point B"></GeoInput>
-  <div><button @click="calculateDistance">Calculate Distans</button></div>
+  <div  v-show="loading">
+    <p>Calculating...</p>
+  </div>
+  <div v-show="!loading">
+    <button @click="sendToCalculate">Calculate Distans</button>
+  </div>
   <div v-show="showDistance">
     <div><span>Distance</span></div>
     <div><span>meters: </span>{{Math.round(distance)}}</div>
