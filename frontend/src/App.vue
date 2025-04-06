@@ -1,5 +1,5 @@
 <script setup>
-import { useTemplateRef, ref, watch} from 'vue'
+import { useTemplateRef, ref} from 'vue'
 import GeoPoint from '@/models/geo_point.js'
 import GeoInput from '@/components/GeoInput.vue'
 
