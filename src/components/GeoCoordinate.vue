@@ -6,7 +6,7 @@
     whichAxis: String,
   });
 
-  let form = 'd';
+  let whichForm = 'd';
 
   const whichAxis = props.whichAxis;
   const positionText = ref('');
@@ -23,9 +23,7 @@
       return null
     }
 
-    const coordinate = parseCoordinate(text, whichAxis, form)
-
-    console.log('coordinate', coordinate)
+    const coordinate = parseCoordinate(text, whichAxis, whichForm)
 
     if (coordinate == null){
       displayError.value = true;
@@ -40,21 +38,21 @@
     return coordinate[0];
   }
 
-  function changeForm(newForm){
-    const oldForm = form;
-    form = newForm;
+  function changeWhichForm(newwhichForm){
+    const oldwhichForm = whichForm;
+    whichForm = newwhichForm;
     displayEmpty.value = false;
     displayError.value = false;
 
     let text = positionText.value.trim();
     if (text == '') return;
 
-    const coordinate = parseCoordinate(text, whichAxis, oldForm)
+    const coordinate = parseCoordinate(text, whichAxis, oldwhichForm)
     if(coordinate == null) return;
-    positionText.value = formatCoordinate(coordinate[0], whichAxis, newForm)
+    positionText.value = formatCoordinate(coordinate[0], whichAxis, newwhichForm)
   }
 
-defineExpose({getCoordinate, changeForm});
+defineExpose({getCoordinate, changeWhichForm});
 
 </script>
 

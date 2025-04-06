@@ -12,17 +12,14 @@ function splitFloat(number, intPartDigits, fractionPartMaxDigids){
 }
 
 
-function formatCoordinate(value, axis, form) {
+function formatCoordinate(value, whichAxis, whichForm) {
   const DEGREE = String.fromCharCode(176); // ASCII-safe degree symbol
 
   const degFloat = Math.abs(value);
 
-  console.log(axis)
-  console.log(form)
-
   let direction = '';
   let maxDigids = 0;
-  if (axis == 'lat'){
+  if (whichAxis == 'lat'){
     maxDigids = 2;
     if(value >= 0) direction = 'N';
     else direction = 'S';
@@ -31,40 +28,39 @@ function formatCoordinate(value, axis, form) {
     if(value >= 0) direction = 'E';
     else direction = 'W';
   }
-  console.log(maxDigids);
 
-  if (form == 'd') {
+  if (whichForm == 'd') {
     // DD.F° N/S or DDD.F° E/W
-    let [intPart, fracPart] = splitFloat(degFloat, maxDigids, 6)
+    let [intPart, fracPart] = splitFloat(degFloat, maxDigids, 6);
     return `${intPart}.${fracPart}${DEGREE} ${direction}`;
 
-  } else if (form == 'dm') {
+  } else if (whichForm == 'dm') {
     // DD° MM.F N/S or DDD° MM.F E/W
     const degInt = Math.floor(degFloat);
-    const minutesFloat = (degFloat - degInt) * 60
+    const minutesFloat = (degFloat - degInt) * 60;
 
     const degStr = padWithZeros(degInt.toString(), maxDigids);
-    let [intPart, fracPart] = splitFloat(minutesFloat, 2, 4)
+    let [intPart, fracPart] = splitFloat(minutesFloat, 2, 4);
     return `${degStr}${DEGREE} ${intPart}.${fracPart}' ${direction}`;
 
   } else{
     // DD° MM' SS.F" N/S or DDD° MM' SS.F" E/W
     const degInt = Math.floor(degFloat);
-    const minutesFloat = (degFloat - degInt) * 60
-    const minutesInt = Math.floor(minutesFloat)
-    const secondsFloat = (minutesFloat - minutesInt) * 60
+    const minutesFloat = (degFloat - degInt) * 60;
+    const minutesInt = Math.floor(minutesFloat);
+    const secondsFloat = (minutesFloat - minutesInt) * 60;
 
     const degStr = padWithZeros(degInt.toString(), maxDigids);
     const minutesStr = padWithZeros(minutesInt.toString(), 2);
-    let [intPart, fracPart] = splitFloat(secondsFloat, 2, 2)
+    let [intPart, fracPart] = splitFloat(secondsFloat, 2, 2);
     return `${degStr}${DEGREE} ${minutesStr}' ${intPart}.${fracPart}" ${direction}`;
   }
 }
 
 
-function parseCoordinate(coord, axis, form) {
+function parseCoordinate(coord, whichAxis, whichForm) {
   const DEGREE = String.fromCharCode(176); // degree sign
-  const isLat = (axis == 'lat');
+  const isLat = (whichAxis == 'lat');
   const maxDigids = isLat ? 2 : 3;
 
 
@@ -79,7 +75,7 @@ function parseCoordinate(coord, axis, form) {
   let absValue;
   let sense;
 
-  if (form == 'd') {
+  if (whichForm == 'd') {
     let regex = /^(\d+)(?:[.,](\d+))?D?([sSnNeEwW])$/
     let match = coord.match(regex);
     if (match === null) return null;
@@ -91,7 +87,7 @@ function parseCoordinate(coord, axis, form) {
     absValue = parseFloat(`${deg}.${fraction}`);
     displayText=`${padWithZeros(deg, maxDigids)}.${fraction}${DEGREE}`
 
-  } else if (form == 'dm') {
+  } else if (whichForm == 'dm') {
     let regex = /^(\d+)D(?:(\d+)(?:[,.](\d+))?M)?([sSnNeEwW])$/
     let match = coord.match(regex);
     if (match === null) return null;
@@ -106,7 +102,7 @@ function parseCoordinate(coord, axis, form) {
     absValue = parseInt(deg) + (parseFloat(`${minutes}.${fraction}`) / 60);
     displayText=`${padWithZeros(deg, maxDigids)}${DEGREE} ${padWithZeros(minutes, 2)}.${fraction}'`
 
-  } else if (form == 'dms') {
+  } else if (whichForm == 'dms') {
     let regex = /^(\d+)D(?:(\d+)M(?:(\d)+(?:[,.](\d+))?S)?)?([sSnNeEwW])$/
     let match = coord.match(regex);
     if (match === null) return null;

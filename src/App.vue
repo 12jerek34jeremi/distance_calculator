@@ -7,7 +7,7 @@ const geoInputA = useTemplateRef('point-a')
 const geoInputB = useTemplateRef('point-b')
 const showDistance = ref(false)
 const distance = ref(0)
-const form = ref('d')
+const whichForm = ref('d')
 
 function calculateDistance(){
   let pointA = geoInputA.value.getPosition()
@@ -29,10 +29,10 @@ function calculateDistance(){
 
 
 watch(
-  form,
-  (newForm) => {
-    geoInputA.value.changeForm(newForm);
-    geoInputB.value.changeForm(newForm);
+  whichForm,
+  (newWhichForm) => {
+    geoInputA.value.changeWhichForm(newWhichForm);
+    geoInputB.value.changeWhichForm(newWhichForm);
   }
 )
 
@@ -41,16 +41,15 @@ watch(
 <template>
   <div><span>Type the two points positions:</span></div>
   <div>
-    <div><p>Picked: {{ form }}</p></div>
-
+    
     <label for="one">deg</label>
-    <input type="radio" id="raio-d" value="d" v-model="form" />
+    <input type="radio" id="raio-d" value="d" v-model="whichForm" />
 
     <label for="one">deg-min</label>
-    <input type="radio" id="raio-dms" value="dm" v-model="form" />
+    <input type="radio" id="raio-dms" value="dm" v-model="whichForm" />
 
     <label for="one">deg-min-sec</label>
-    <input type="radio" id="raio-dms" value="dms" v-model="form" />
+    <input type="radio" id="raio-dms" value="dms" v-model="whichForm" />
   </div>
 
   <GeoInput ref="point-a" label-text="Point A"></GeoInput>

@@ -21,12 +21,12 @@ import { useTemplateRef } from 'vue'
     return new GeoPoint(lat, lon);
   }
 
-  function changeForm(newForm) {
-    latCom.value.changeForm(newForm);
-    lonCom.value.changeForm(newForm);
+  function changeWhichForm (newWhichForm ) {
+    latCom.value.changeWhichForm (newWhichForm );
+    lonCom.value.changeWhichForm (newWhichForm );
   }
 
-  defineExpose({getPosition, changeForm});
+  defineExpose({getPosition, changeWhichForm });
 
 </script>
 
