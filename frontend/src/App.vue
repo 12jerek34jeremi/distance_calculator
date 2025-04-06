@@ -52,8 +52,8 @@ function sendToCalculate(){
 
 <template>
   <div><span>Type the two points positions:</span></div>
-  <GeoInput ref="point-a" label-text="Point A"></GeoInput>
-  <GeoInput ref="point-b" label-text="Point B"></GeoInput>
+  <GeoInput ref="point-a" label-text="Point A" initial-form="d"></GeoInput>
+  <GeoInput ref="point-b" label-text="Point B" initial-form="d"></GeoInput>
   <div  v-show="loading">
     <p>Calculating...</p>
   </div>

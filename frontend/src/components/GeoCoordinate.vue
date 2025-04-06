@@ -4,17 +4,40 @@
 
   const props = defineProps({
     whichAxis: String,
+    initialForm: String
   });
 
-  let whichForm = 'd';
+  let whichForm = props.initialForm;
 
   const whichAxis = props.whichAxis;
   const positionText = ref('');
   const displayError = ref(false);
   const displayEmpty = ref(false);
+  const placeholderText = ref('');
+  const DEGREE = String.fromCharCode(176);
 
+  function setPlaceholder(newWhichForm){
+    if(whichAxis == 'lat'){
+      if(newWhichForm=='d'){
+        placeholderText.value = `52.207465${DEGREE} N`;
+      }else if(newWhichForm=='dm'){
+        placeholderText.value = `52${DEGREE} 12.4479 N`;
+      }else{
+        placeholderText.value = `52${DEGREE} 12' 06.87" N`;
+      }
+    }else{
+      if(newWhichForm=='d'){
+        placeholderText.value = `20.915066${DEGREE} E`;
+      }else if(newWhichForm=='dm'){
+        placeholderText.value = `020${DEGREE} 54.904' E`;
+      }else{
+        placeholderText.value = `020${DEGREE} 54' 54.24" E`;
+      }
+    }
+  }
 
   function getCoordinate() {
+
     let text = positionText.value.trim();
 
     if (text == ''){
@@ -39,6 +62,8 @@
   }
 
   function changeWhichForm(newwhichForm){
+    setPlaceholder(newwhichForm);
+
     const oldwhichForm = whichForm;
     whichForm = newwhichForm;
     displayEmpty.value = false;
@@ -52,7 +77,9 @@
     positionText.value = formatCoordinate(coordinate[0], whichAxis, newwhichForm)
   }
 
-defineExpose({getCoordinate, changeWhichForm});
+  setPlaceholder(whichForm);
+
+  defineExpose({getCoordinate, changeWhichForm});
 
 </script>
 
@@ -64,7 +91,7 @@ defineExpose({getCoordinate, changeWhichForm});
           @blur="getCoordinate(parse=true)"
           type="text"
           v-model="positionText"
-          :placeholder="(whichAxis == 'lat') ? '52.207465 N' : '20.915066 E'"
+          :placeholder="placeholderText"
         />
       </div>
       <div>

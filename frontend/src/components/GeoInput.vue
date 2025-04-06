@@ -3,11 +3,12 @@ import {ref, useTemplateRef, watch} from 'vue'
   import GeoPoint from '@/models/geo_point.js'
   import GeoCoordinate from '@/components/GeoCoordinate.vue'
 
-  defineProps({
+  const props = defineProps({
     labelText: String,
+    initialForm: String
   });
 
-  const whichForm = ref('d');
+  const whichForm = ref(props.initialForm);
 
   const latCom = useTemplateRef('lat');
   const lonCom = useTemplateRef('lon');
@@ -51,8 +52,8 @@ import {ref, useTemplateRef, watch} from 'vue'
         <label for="one">deg-min-sec</label>
         <input type="radio" id="raio-dms" value="dms" v-model="whichForm" />
       </div>
-      <GeoCoordinate ref="lat" which-axis="lat"/>
-      <GeoCoordinate ref="lon" which-axis="lon"/>
+      <GeoCoordinate ref="lat" which-axis="lat" :initial-form="props.initialForm"/>
+      <GeoCoordinate ref="lon" which-axis="lon" :initial-form="props.initialForm"/>
     </div>
   </div>
 </template>
