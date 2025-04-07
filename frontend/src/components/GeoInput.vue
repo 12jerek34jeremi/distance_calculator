@@ -1,3 +1,24 @@
+<!--
+  GeoInput.vue
+
+  A composite Vue component for capturing a full geographic point (latitude and longitude) using two
+  `GeoCoordinate` inputs. Provides format selection radio buttons to switch between coordinate
+  formats. Possible coordinates formats:
+    - 'd'   : Decimal degrees (e.g., "45.1234N" or "45,1234 n")
+    - 'dm'  : Degrees and decimal minutes (e.g., "45D07.40'N")
+    - 'dms' : Degrees, minutes, and decimal seconds (e.g., "45D 07M 24.4S")
+
+  Props:
+  - labelText (String): Label displayed alongside the coordinate input group. (like PointA or
+    PointB)
+  - initialForm (String): Initial format to be used for both latitude and longitude inputs.
+
+  Public Methods (via defineExpose):
+  - getPosition(): Returns a `GeoPoint` object containing parsed latitude and longitude values, or
+                   `null` if either input is empty or invalid.
+-->
+
+
 <script setup>
 import { ref, useTemplateRef, watch } from 'vue'
 import GeoPoint from '@/models/geo_point.js'

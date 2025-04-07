@@ -1,3 +1,16 @@
+<!--
+  DistanceCalculator.vue
+
+  A user interface component for calculating the distance between two geographic points
+  provided via coordinate input fields.
+
+  Functionality:
+  - Uses two `GeoInput` components to collect and validate input for Point A and Point B.
+  - Sends the validated coordinates as query parameters to a backend API to compute distance.
+  - Displays the result in both meters and kilometers, or appropriate error messages if inputs are invalid.
+  - Supports coordinate entry in decimal degrees, degrees-minutes, or degrees-minutes-seconds.
+-->
+
 <script setup>
 import { useTemplateRef, ref} from 'vue'
 import GeoPoint from '@/models/geo_point.js'
@@ -9,11 +22,19 @@ const showDistance = ref(false);
 const loading = ref(false);
 const distance = ref(0);
 
+const fatalError = ref(false);
+
 
 function displayDistans(responseText) {
-  if(responseText == 'error'){console.log('error 1'); return;}
+  if(responseText == 'error'){
+    fatalError.value = true;
+    return;
+  }
   let receivedDistance = parseInt(responseText);
-  if(receivedDistance == NaN){console.log('error 2'); return;}
+  if(receivedDistance == NaN){
+    fatalError.value = true;
+    return;
+  }
   
   distance.value = receivedDistance;
   showDistance.value = true;
@@ -41,17 +62,29 @@ function sendToCalculate(){
   const params = `lat-a=${pointA.lat}&lon-a=${pointA.lon}&lat-b=${pointB.lat}&lon-b=${pointB.lon}`
   const url = `/api/calculate.php?${params}`
   const request = new XMLHttpRequest();
-  request.onload = function(){
-    displayDistans(this.responseText);
+
+  request.onerror = function(){
+    this.abort();
+    fatalError.value = true;
   }
+  request.onload = function(){
+    if(this.status < 200 || this.status > 299){
+      this.abort();
+      fatalError.value = true;
+    }else{
+      displayDistans(this.responseText);
+    }
+  }
+  
   request.open('GET', url, true);
   request.send();
+
 }
 
 </script>
 
 <template>
-  <div class="distance-calculator">
+  <div class="distance-calculator" v-show="!fatalError">
     <div><h2 class="title">Type the two points positions:</h2></div>
 
     <GeoInput ref="point-a" label-text="Point A" initial-form="d" />
@@ -81,6 +114,9 @@ function sendToCalculate(){
         <strong>Spaces are optional.</strong>
       </p>
     </div>
+  </div>
+  <div v-show="fatalError">
+    <p>An error occurred. Please try again later.</p>
   </div>
 </template>
 

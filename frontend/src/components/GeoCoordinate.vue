@@ -1,5 +1,28 @@
+<!--
+  CoordinateInput.vue
+
+  A reusable input component for entering and validating geographic coordinates (latitude or
+  longitude) in various formats: decimal degrees (d), degrees-minutes (dm), or
+  degrees-minutes-seconds (dms). Includes <input type="text" for coordinate> and div (below) it for
+  displaying errors like "invalid coordinate format" or "Insert a coordinate!"
+  Possible coordinates formats:
+    - 'd'   : Decimal degrees (e.g., "45.1234N" or "45,1234 n")
+    - 'dm'  : Degrees and decimal minutes (e.g., "45D07.40'N")
+    - 'dms' : Degrees, minutes, and decimal seconds (e.g., "45D 07M 24.4S")
+
+  Props:
+  - whichAxis (String): Specifies whether the input is for 'lat' (latitude) or 'lon' (longitude).
+  - initialForm (String): The initial format of the coordinate ('d', 'dm', or 'dms').
+
+  Public Methods (via defineExpose):
+  - getCoordinate(): Parses the coordinate. It toogles displaying  error messages for invalid or
+        empty input. It returns a coordinate as float, if string in input is a valid coordinate.
+        Returns `null` if the input is empty or invalid.
+  - changeWhichForm(newForm): Changes the coordinate format.
+-->
 <script setup>
   import { ref } from 'vue'
+  import {InvalidAxisError, InvalidFormError, InvalidCoordRangeError} from '@/models/geo_errors.js'
   import {formatCoordinate,parseCoordinate} from '@/models/utils.js'
 
   const props = defineProps({
@@ -16,22 +39,27 @@
   const placeholderText = ref('');
   const DEGREE = String.fromCharCode(176);
 
+  // which form can be 'd', 'dm', or 'dms'
   function setPlaceholder(newWhichForm){
     if(whichAxis == 'lat'){
       if(newWhichForm=='d'){
         placeholderText.value = `52.207465${DEGREE} N`;
       }else if(newWhichForm=='dm'){
         placeholderText.value = `52${DEGREE} 12.4479 N`;
-      }else{
+      }else if(newWhichForm=='dms'){
         placeholderText.value = `52${DEGREE} 12' 06.87" N`;
+      }else{
+        throw new InvalidFormError(newWhichForm);
       }
     }else{
       if(newWhichForm=='d'){
         placeholderText.value = `20.915066${DEGREE} E`;
       }else if(newWhichForm=='dm'){
         placeholderText.value = `020${DEGREE} 54.904' E`;
-      }else{
+      }else if(newWhichForm=='dms'){
         placeholderText.value = `020${DEGREE} 54' 54.24" E`;
+      }else{
+        throw new InvalidFormError(newWhichForm);
       }
     }
   }

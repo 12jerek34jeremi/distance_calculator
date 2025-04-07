@@ -25,10 +25,10 @@
 
   if (
       $latA === false || $lonA === false || $latB === false || $lonB === false ||
-      $latA <= -90 || $latA >= 90 ||
-      $latB <= -90 || $latB >= 90 ||
-      $lonA <= -180 || $lonA >= 180 ||
-      $lonB <= -180 || $lonB >= 180
+      $latA < -90 || $latA > 90 ||
+      $latB < -90 || $latB > 90 ||
+      $lonA < -180 || $lonA > 180 ||
+      $lonB < -180 || $lonB > 180
   ) {
       echo "error";
       exit;
