@@ -20,8 +20,24 @@ import {InvalidAxisError, InvalidFormError, InvalidCoordRangeError} from '@/mode
  * padWithZeros("7", 3);       // "007"
  * padWithZeros("123", 2);     // "123" (no padding, already long enough)
  */
-function padWithZeros(toPad, n){
-  return '0'.repeat(Math.max(0, n-toPad.length)) + toPad;
+function padOrCut(toPad, n){
+  if(toPad.length == n){
+    return toPad
+  }else if(toPad.length<n){
+    return '0'.repeat(Math.max(0, n-toPad.length)) + toPad;
+  }else{
+    const toCut = toPad.length-n
+    if(toPad.slice(0, toCut) != '0'.repeat(toCut)){
+      throw new Error(`Invalud padOrCut arguments: '${toPad}' and '${n}'.`)
+    }
+    return toPad.slice(toCut, toPad.length)
+  }
+}
+
+function removeTralingZeros(fracPart){
+  fracPart = fracPart.replace(/0+$/, '');
+  if(fracPart == '') fracPart = '0';
+  return fracPart;
 }
 
 /**
@@ -41,9 +57,8 @@ function padWithZeros(toPad, n){
  */
 function splitFloat(number, intPartDigits, fractionPartMaxDigids){
   let [intPart, fracPart] = number.toFixed(fractionPartMaxDigids).split('.');
-  intPart = padWithZeros(intPart, intPartDigits);
-  fracPart = fracPart.replace(/0+$/, '');
-  if(fracPart == '') fracPart = '0';
+  intPart = padOrCut(intPart, intPartDigits);
+  fracPart = removeTralingZeros(fracPart)
   return [intPart, fracPart]
 }
 
@@ -99,7 +114,7 @@ function formatCoordinate(value, whichAxis, whichForm) {
     const degInt = Math.floor(degFloat);
     const minutesFloat = (degFloat - degInt) * 60;
 
-    const degStr = padWithZeros(degInt.toString(), maxDigids);
+    const degStr = padOrCut(degInt.toString(), maxDigids);
     let [intPart, fracPart] = splitFloat(minutesFloat, 2, 4);
     return `${degStr}${DEGREE} ${intPart}.${fracPart}' ${direction}`;
 
@@ -110,8 +125,8 @@ function formatCoordinate(value, whichAxis, whichForm) {
     const minutesInt = Math.floor(minutesFloat);
     const secondsFloat = (minutesFloat - minutesInt) * 60;
 
-    const degStr = padWithZeros(degInt.toString(), maxDigids);
-    const minutesStr = padWithZeros(minutesInt.toString(), 2);
+    const degStr = padOrCut(degInt.toString(), maxDigids);
+    const minutesStr = padOrCut(minutesInt.toString(), 2);
     let [intPart, fracPart] = splitFloat(secondsFloat, 2, 2);
     return `${degStr}${DEGREE} ${minutesStr}' ${intPart}.${fracPart}" ${direction}`;
   }else{
@@ -145,6 +160,7 @@ function parseCoordinate(coord, whichAxis, whichForm) {
   const DEGREE = String.fromCharCode(176); // degree sign
   if (whichAxis != 'lat' && whichAxis != 'lon') throw new InvalidAxisError(whichAxis);
   const maxDigids = (whichAxis == 'lat') ? 2 : 3;
+  const maxValue = (whichAxis == 'lat') ? 90 : 180;
 
   coord = coord
   .toUpperCase() // change d to D, e to E, n to N, s to S, etc...
@@ -162,43 +178,55 @@ function parseCoordinate(coord, whichAxis, whichForm) {
     let match = coord.match(regex);
     if (match === null) return null;
 
-    const deg = match[1];
-    const fraction = (match[2] == null) ? '0' : match[2];
+    let deg = match[1];
+    let fraction = (match[2] == null) ? '0' : match[2];
     sense = match[3];
 
+    if(parseInt(deg) > maxValue) return null;
     absValue = parseFloat(`${deg}.${fraction}`);
-    displayText=`${padWithZeros(deg, maxDigids)}.${fraction}${DEGREE}`
+
+    deg = padOrCut(deg, maxDigids);
+    fraction = removeTralingZeros(fraction);
+    displayText=`${deg}.${fraction}${DEGREE}`;
 
   } else if (whichForm == 'dm') {
     let regex = /^(\d+)D(?:(\d+)(?:[,.](\d+))?M)?([sSnNeEwW])$/
     let match = coord.match(regex);
     if (match === null) return null;
 
-    const deg = match[1];
-    const minutes = (match[2] == null) ? '0' : match[2];
-    const fraction = (match[3] == null) ? '0' : match[3];
+    let deg = match[1];
+    let minutes = (match[2] == null) ? '0' : match[2];
+    let fraction = (match[3] == null) ? '0' : match[3];
     sense = match[4];
 
-    if(parseInt(minutes) > 59) return null;
-
+    if(parseInt(deg) > maxValue || parseInt(minutes) > 59) return null;
     absValue = parseInt(deg) + (parseFloat(`${minutes}.${fraction}`) / 60);
-    displayText=`${padWithZeros(deg, maxDigids)}${DEGREE} ${padWithZeros(minutes, 2)}.${fraction}'`
+
+    deg = padOrCut(deg, maxDigids);
+    minutes = padOrCut(minutes, 2);
+    fraction = removeTralingZeros(fraction);
+    displayText=`${deg}${DEGREE} ${minutes}.${fraction}'`
 
   } else if (whichForm == 'dms') {
     let regex = /^(\d+)D(?:(\d+)M(?:(\d+)(?:[,.](\d+))?S)?)?([sSnNeEwW])$/
     let match = coord.match(regex);
+
     if (match === null) return null;
 
-    const deg = match[1];
-    const minutes = (match[2] == null) ? '0' : match[2];
-    const seconds = (match[3] == null) ? '0' : match[3];
-    const fraction = (match[4] == null) ? '0' : match[4];
+    let deg = match[1];
+    let minutes = (match[2] == null) ? '0' : match[2];
+    let seconds = (match[3] == null) ? '0' : match[3];
+    let fraction = (match[4] == null) ? '0' : match[4];
     sense = match[5];
 
-    if(parseInt(minutes) > 59 || parseInt(seconds) > 59) return null;
-
+    if(parseInt(deg) > maxValue || parseInt(minutes) > 59 || parseInt(seconds) > 59) return null;
     absValue = parseInt(deg) + (parseInt(minutes) / 60)+(parseFloat(`${seconds}.${fraction}`)/3600);
-    displayText=`${padWithZeros(deg, maxDigids)}${DEGREE} ${padWithZeros(minutes, 2)}' ${padWithZeros(seconds, 2)}.${fraction}"`
+    
+    deg = padOrCut(deg, maxDigids);
+    minutes = padOrCut(minutes, 2);
+    seconds = padOrCut(seconds, 2);
+    fraction = removeTralingZeros(fraction);
+    displayText=`${deg}${DEGREE} ${minutes}' ${seconds}.${fraction}"`
   }else{
     throw new InvalidFormError(whichForm);
   }

@@ -1,0 +1,46 @@
+import { expect, test } from 'vitest'
+import { formatCoordinate, parseCoordinate } from '@/models/utils.js'
+
+const DG = String.fromCharCode(176); // ASCII-safe degree symbol
+
+
+const testData = [
+  // Decimal degrees - Latitude
+   [`d`, `lat`, `45.5${DG} N`, 45.5,  [`45.5dn`, `45.5 n`, `45.5 ${DG} N`, `045.5D N`, `045,5dN `]],
+   [`d`, `lat`, `12.25${DG} S`, -12.25,  [`12.25 s`, `012.25dS`, `12,25°s`, `12.25Ds `]],
+
+  // Decimal degrees - Longitude
+   [`d`, `lon`, `123.456${DG} E`, 123.456,  [`123.456 e`, `123,456dE`, `123.456° E`, `123.456 D e `]],
+   [`d`, `lon`, `078.9${DG} W`, -78.9,  [`078.9w`, `078.9 D w`, `078,9${DG}W`, `078.900dW `]],
+
+  // Degrees and decimal minutes - Latitude
+   [`dm`, `lat`, `45${DG} 30.0' N`, 45.5,  [`45D30M N`, `45d30.0mn`, `045°30,00M N`, `45D30,00MN `]],
+   [`dm`, `lat`, `12${DG} 15.0' S`, -12.25,  [`12D15.0mS`, `012°15.00M s`, `12d15m s `]],
+
+  // Degrees and decimal minutes - Longitude
+   [`dm`, `lon`, `123${DG} 27.36' E`, 123.456,  [`123D27.36M e`, `123d27,36me`, `123°27.36mE `]],
+   [`dm`, `lon`, `078${DG} 54.0' W`, -78.9,  [`078d54mW`, `078°54.00M w`, `78D54.00m w `]],
+
+  // Degrees, minutes, and decimal seconds - Latitude
+   [`dms`, `lat`, `45${DG} 30' 00.0" N`, 45.5,  [`45D30M00.00Sn`, `45d30m00.00s N`, `045°30'00,00"n `]],
+   [`dms`, `lat`, `12${DG} 15' 00.0" S`, -12.25,  [`012d15m00.00s  s`, `12D15M00,00Ss`, `12°15'00" S`]],
+
+  // Degrees, minutes, and decimal seconds - Longitude
+   [`dms`, `lon`, `123${DG} 27' 21.6" E`, 123.456,  [`123D27M21.60Se`, `123°27m21.6se `, `123d27m21,60s E`]],
+   [`dms`, `lon`, `078${DG} 54' 00.0" W`, -78.9,  [`078d54m00.00s w`, `078D54M00,00S w`, `78°54'00"W `]]
+];
+
+
+test('formatCoordinate', () => {
+  for(const [form, axis, displayText, flValue, _] of testData){
+    expect(formatCoordinate(flValue, axis, form)).toBe(displayText)
+  }
+})
+
+test('parseCoordinate', () => {
+  for(const [form, axis, displayText, flValue, possibleStrings] of testData){
+    for(const coordString of possibleStrings){
+      expect(parseCoordinate(coordString, axis, form)).toEqual([flValue, displayText])
+    }
+  }
+})
