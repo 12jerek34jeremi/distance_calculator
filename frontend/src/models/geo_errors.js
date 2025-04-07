@@ -14,9 +14,8 @@ class InvalidFormError extends Error {
 
 class InvalidCoordRangeError extends Error {
   constructor(value, whichAxis) {
-    super()
-    super(`Invalid value. '${whichForm}' is out of range of ${whichAxis}`);
-    this.whichForm = whichForm;
+    super(`Invalid value. '${value}' is out of range of ${whichAxis}`);
+    this.whichAxis = whichAxis;
   }
 }
 

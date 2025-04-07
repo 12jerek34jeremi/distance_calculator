@@ -74,13 +74,13 @@ function formatCoordinate(value, whichAxis, whichForm) {
   let direction = '';
   let maxDigids = 0;
   if (whichAxis == 'lat'){
-    if(value < 0.0 || value > 90.0)
+    if(value < -90.0 || value > 90.0)
       throw new InvalidCoordRangeError(value, whichAxis);
     maxDigids = 2;
     if(value >= 0) direction = 'N';
     else direction = 'S';
   }else if(whichAxis == 'lon'){
-    if(value < 0.0 || value > 180.0)
+    if(value < -90.0 || value > 180.0)
       throw new InvalidCoordRangeError(value, whichAxis);
     maxDigids = 3;
     if(value >= 0) direction = 'E';

@@ -46,7 +46,7 @@ To build and run the app using Docker, simply execute the following two commands
 docker build -t discal .
 ```
 ```bash
-docker run -d -p 80:80
+docker run -d -p 80:80 discal
 ```
 You can then access the website at ["localhost:80"]().
 

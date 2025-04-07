@@ -1,4 +1,33 @@
 <?php
+/**
+ * Distance Calculation Endpoint (calculate.php)
+ *
+ * This script receives two geographic points (latitude and longitude for each)
+ * via HTTP GET parameters and returns the calculated distance between them in meters,
+ * using the Haversine formula.
+ *
+ * Expected GET parameters:
+ * - lat-a, lon-a: Coordinates of the first point
+ * - lat-b, lon-b: Coordinates of the second point
+ *
+ * Example request:
+ *   /calculate.php?lat-a=40.7128&lon-a=-74.0060&lat-b=34.0522&lon-b=-118.2437
+ *
+ * Example response:
+ *   3935746
+ *
+ * If any parameter is missing or invalid, the script responds with:
+ *   error
+ */
+
+
+
+  /**
+ * Calculates the distance between two geographic coordinates using the Haversine formula. The
+ * returned distance is in meters.
+ * Source: Adapted from the JavaScript version on StackOverflow  
+ * https://stackoverflow.com/questions/27928/calculate-distance-between-two-latitude-longitude-points-haversine-formula
+ */
   function calculateDistance(float $latA, float $lonA, float $latB, float $lonB): float {
       $R = 6371000; // Radius of the earth in meters
       $dLat = deg2rad($latB - $latA);
