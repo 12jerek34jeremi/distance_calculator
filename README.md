@@ -10,7 +10,9 @@ Users can enter the coordinates of both points in any of the following formats:
 After entering both coordinates, click the **Calculate** button.  
 The computed distance between the points will be displayed below the input fields.
 
-## Exemplary Screenshots
+## Exemplary Screenshots and Video
+
+***[Video Link (click)](https://drive.google.com/file/d/1JhfXDONRNpHcBuPHtD-bOjZ1HUrJua9Q/view?usp=sharing)***
 
 <div align="center">
 <table>

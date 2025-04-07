@@ -13,7 +13,6 @@
 
 <script setup>
 import { useTemplateRef, ref} from 'vue'
-import GeoPoint from '@/models/geo_point.js'
 import GeoInput from '@/components/GeoInput.vue'
 
 const geoInputA = useTemplateRef('point-a');
@@ -31,7 +30,7 @@ function displayDistans(responseText) {
     return;
   }
   let receivedDistance = parseInt(responseText);
-  if(receivedDistance == NaN){
+  if(isNaN(receivedDistance)){
     fatalError.value = true;
     return;
   }

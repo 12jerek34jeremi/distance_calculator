@@ -22,7 +22,7 @@
 -->
 <script setup>
   import { ref } from 'vue'
-  import {InvalidAxisError, InvalidFormError, InvalidCoordRangeError} from '@/models/geo_errors.js'
+  import {InvalidAxisError, InvalidFormError} from '@/models/geo_errors.js'
   import {formatCoordinate,parseCoordinate} from '@/models/utils.js'
 
   const props = defineProps({
@@ -51,7 +51,7 @@
       }else{
         throw new InvalidFormError(newWhichForm);
       }
-    }else{
+    }else if(whichAxis == 'lon'){
       if(newWhichForm=='d'){
         placeholderText.value = `20.915066${DEGREE} E`;
       }else if(newWhichForm=='dm'){
@@ -61,6 +61,8 @@
       }else{
         throw new InvalidFormError(newWhichForm);
       }
+    }else{
+      throw new InvalidAxisError(whichAxis);
     }
   }
 
