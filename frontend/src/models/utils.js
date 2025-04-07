@@ -185,7 +185,7 @@ function parseCoordinate(coord, whichAxis, whichForm) {
     displayText=`${padWithZeros(deg, maxDigids)}${DEGREE} ${padWithZeros(minutes, 2)}.${fraction}'`
 
   } else if (whichForm == 'dms') {
-    let regex = /^(\d+)D(?:(\d+)M(?:(\d)+(?:[,.](\d+))?S)?)?([sSnNeEwW])$/
+    let regex = /^(\d+)D(?:(\d+)M(?:(\d+)(?:[,.](\d+))?S)?)?([sSnNeEwW])$/
     let match = coord.match(regex);
     if (match === null) return null;
 
