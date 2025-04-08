@@ -50,9 +50,9 @@ test('formatCoordinate', () => {
 })
 
 test('parseCoordinateValid', () => {
-  for(const [form, axis, displayText, flValue, possibleStrings] of validCoordinates){
+  for(const [form, axis, _, flValue, possibleStrings] of validCoordinates){
     for(const coordString of possibleStrings){
-      expect(parseCoordinate(coordString, axis, form)).toEqual([flValue, displayText]);
+      expect(parseCoordinate(coordString, axis, form)).toBe(flValue);
     }
   }
 })

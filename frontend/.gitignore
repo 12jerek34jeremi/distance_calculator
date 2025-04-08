@@ -31,3 +31,5 @@ coverage
 
 .vscode
 .editorconfig
+
+package-lock.json
