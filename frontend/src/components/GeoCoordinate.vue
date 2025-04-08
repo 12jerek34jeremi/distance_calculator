@@ -21,7 +21,7 @@
   - changeWhichForm(newForm): Changes the coordinate format.
 -->
 <script setup>
-  import { ref } from 'vue'
+  import { ref, computed} from 'vue'
   import {InvalidAxisError, InvalidFormError} from '@/models/geo_errors.js'
   import {formatCoordinate,parseCoordinate} from '@/models/utils.js'
 
@@ -30,96 +30,109 @@
     initialForm: String
   });
 
-  let whichForm = props.initialForm;
-
+  const DEGREE = String.fromCharCode(176);
   const whichAxis = props.whichAxis;
-  const positionText = ref('');
+
+  const coordinateText = ref('');
   const displayError = ref(false);
   const displayEmpty = ref(false);
-  const placeholderText = ref('');
-  const DEGREE = String.fromCharCode(176);
+  let whichForm = ref(props.initialForm);
 
-  // which form can be 'd', 'dm', or 'dms'
-  function setPlaceholder(newWhichForm){
+  let inputChanged = false;
+  let floatValue = null;
+
+  const placeHolderText = computed(() => {
+    const newWhichForm = whichForm.value;
     if(whichAxis == 'lat'){
       if(newWhichForm=='d'){
-        placeholderText.value = `52.207465${DEGREE} N`;
+        return `52.207465${DEGREE} N`;
       }else if(newWhichForm=='dm'){
-        placeholderText.value = `52${DEGREE} 12.4479 N`;
+        return `52${DEGREE} 12.4479 N`;
       }else if(newWhichForm=='dms'){
-        placeholderText.value = `52${DEGREE} 12' 06.87" N`;
+        return `52${DEGREE} 12' 06.87" N`;
       }else{
         throw new InvalidFormError(newWhichForm);
       }
     }else if(whichAxis == 'lon'){
       if(newWhichForm=='d'){
-        placeholderText.value = `20.915066${DEGREE} E`;
+        return `20.915066${DEGREE} E`;
       }else if(newWhichForm=='dm'){
-        placeholderText.value = `020${DEGREE} 54.904' E`;
+        return `020${DEGREE} 54.904' E`;
       }else if(newWhichForm=='dms'){
-        placeholderText.value = `020${DEGREE} 54' 54.24" E`;
+        return `020${DEGREE} 54' 54.24" E`;
       }else{
         throw new InvalidFormError(newWhichForm);
       }
     }else{
       throw new InvalidAxisError(whichAxis);
     }
-  }
+  });
 
-  function getCoordinate() {
-
-    let text = positionText.value.trim();
+  function updateCoordinate(){
+    const text = coordinateText.value.trim();
 
     if (text == ''){
       displayError.value = false;
       displayEmpty.value = true;
-      return null
-    }
-
-    const coordinate = parseCoordinate(text, whichAxis, whichForm)
-
-    if (coordinate == null){
-      displayError.value = true;
+      floatValue = null;
+    }else{
       displayEmpty.value = false;
-      return null;
+      floatValue = parseCoordinate(text, whichAxis, whichForm.value);
+      if (floatValue == null){
+        displayError.value = true;
+      }else{
+        displayError.value = false;
+        coordinateText.value = formatCoordinate(floatValue, whichAxis, whichForm.value);
+      }
     }
 
-    displayError.value = false;
-    displayEmpty.value = false;
-    positionText.value = coordinate[1];
-
-    return coordinate[0];
+    inputChanged = false;
   }
 
-  function changeWhichForm(newwhichForm){
-    setPlaceholder(newwhichForm);
+  function getCoordinate() {
+    if(inputChanged)
+      updateCoordinate();
 
-    const oldwhichForm = whichForm;
-    whichForm = newwhichForm;
+    return floatValue;
+  }
+
+  function changeWhichForm(newWhichForm){
     displayEmpty.value = false;
     displayError.value = false;
 
-    let text = positionText.value.trim();
-    if (text == '') return;
+    if(inputChanged){
+      const text = coordinateText.value.trim();
+      if(text == ''){
+        floatValue = null;
+      }else{
+        floatValue = parseCoordinate(text, whichAxis, whichForm.value);
+      }
+      inputChanged = false;
+    }
 
-    const coordinate = parseCoordinate(text, whichAxis, oldwhichForm)
-    if(coordinate == null) return;
-    positionText.value = formatCoordinate(coordinate[0], whichAxis, newwhichForm)
+    if(floatValue !== null){
+      coordinateText.value = formatCoordinate(floatValue, whichAxis, newWhichForm);
+    }
+
+    whichForm.value = newWhichForm;
   }
 
-  setPlaceholder(whichForm);
+  function onInputCallback(event){ // i didn't have idea how to name it better
+    inputChanged = true;
+    coordinateText.value = event.target.value;
+  }
 
   defineExpose({getCoordinate, changeWhichForm});
-
 </script>
 
 <template>
   <div class="input-container">
     <input
-      @blur="getCoordinate(parse=true)"
       type="text"
-      v-model="positionText"
-      :placeholder="placeholderText"
+      @input="onInputCallback"
+      @blur="updateCoordinate"
+      :placeholder="placeHolderText"
+      :value="coordinateText"
       class="input-field"
     />
     <div class="error-message-box">

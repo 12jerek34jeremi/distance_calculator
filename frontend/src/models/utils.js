@@ -162,7 +162,6 @@ function formatCoordinate(value, whichAxis, whichForm) {
  * parseCoordinate("78D54M00.00S", "lat", "dms");  // -78.9
  */
 function parseCoordinate(coord, whichAxis, whichForm) {
-  const DEGREE = String.fromCharCode(176); // degree sign
   if (whichAxis != 'lat' && whichAxis != 'lon') throw new InvalidAxisError(whichAxis);
   const isLat = (whichAxis == 'lat');
   const maxValue = isLat ? 90 : 180;
