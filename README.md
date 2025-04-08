@@ -92,6 +92,13 @@ to
     npm run dev
   ```
 
+## Tests
+You can run tests with:
+```bash
+cd frontend
+npm install
+npm run test
+```
   
 ## ---------------------------------------------------------
 
