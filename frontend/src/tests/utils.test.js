@@ -4,7 +4,7 @@ import { formatCoordinate, parseCoordinate } from '@/models/utils.js'
 const DG = String.fromCharCode(176); // ASCII-safe degree symbol
 
 
-const testData = [
+const validCoordinates = [
   // Decimal degrees - Latitude
    [`d`, `lat`, `45.5${DG} N`, 45.5,  [`45.5dn`, `45.5 n`, `45.5 ${DG} N`, `045.5D N`, `045,5dN `]],
    [`d`, `lat`, `12.25${DG} S`, -12.25,  [`12.25 s`, `012.25dS`, `12,25°s`, `12.25Ds `]],
@@ -30,17 +30,37 @@ const testData = [
    [`dms`, `lon`, `078${DG} 54' 00.0" W`, -78.9,  [`078d54m00.00s w`, `078D54M00,00S w`, `78°54'00"W `]]
 ];
 
+const invalidCoordinates = [
+  ['d', 'lat', ['45.5', '45k.5 n', `45.5${DG}D N`, '45D30.5MN']],
+  ['d', 'lon', ['181.0E', '100.0Q', `120${DG}${DG} W`, '120.0M E']],
+
+  ['dm', 'lat', ['45D60.1M N', '91D00.0M S', '45D30.60.1MN', '45D30M', '45D61M S',]],
+  ['dm', 'lon', ['123D60.00M E', '200D00.00M W', '123D27.36.5M E', '123D27.36M']], 
+
+  ['dms', 'lat', ['45D30M60.01S', '90D00M00.00 Q', '91D00M00.00S']],
+  ['dms', 'lon', ['181D00M00.00E', '123D60M00.00E', '123D27M60.00S', '123D27M21,60,50S']],
+];
+
+
 
 test('formatCoordinate', () => {
-  for(const [form, axis, displayText, flValue, _] of testData){
-    expect(formatCoordinate(flValue, axis, form)).toBe(displayText)
+  for(const [form, axis, displayText, flValue, _] of validCoordinates){
+    expect(formatCoordinate(flValue, axis, form)).toBe(displayText);
   }
 })
 
-test('parseCoordinate', () => {
-  for(const [form, axis, displayText, flValue, possibleStrings] of testData){
+test('parseCoordinateValid', () => {
+  for(const [form, axis, displayText, flValue, possibleStrings] of validCoordinates){
     for(const coordString of possibleStrings){
-      expect(parseCoordinate(coordString, axis, form)).toEqual([flValue, displayText])
+      expect(parseCoordinate(coordString, axis, form)).toEqual([flValue, displayText]);
+    }
+  }
+})
+
+test('parseCoordinateInvalid', () => {
+  for(const [form, axis, coordStrings] of invalidCoordinates){
+    for(const coordString of coordStrings){
+      expect(parseCoordinate(coordString, axis, form)).toBeNull();
     }
   }
 })
