@@ -19,4 +19,4 @@ class InvalidCoordRangeError extends Error {
   }
 }
 
-export {InvalidAxisError, InvalidFormError, InvalidCoordRangeError};
+export { InvalidAxisError, InvalidFormError, InvalidCoordRangeError };

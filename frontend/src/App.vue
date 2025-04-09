@@ -12,45 +12,44 @@
 -->
 
 <script setup>
-import { useTemplateRef, ref} from 'vue'
-import GeoInput from '@/components/GeoInput.vue'
+import { useTemplateRef, ref } from "vue";
+import GeoInput from "@/components/GeoInput.vue";
 
-const geoInputA = useTemplateRef('point-a');
-const geoInputB = useTemplateRef('point-b');
+const geoInputA = useTemplateRef("point-a");
+const geoInputB = useTemplateRef("point-b");
 const showDistance = ref(false);
 const loading = ref(false);
 const distance = ref(0);
 
 const fatalError = ref(false);
 
-
 function displayDistans(responseText) {
-  if(responseText == 'error'){
+  if (responseText == "error") {
     fatalError.value = true;
     return;
   }
   let receivedDistance = parseInt(responseText);
-  if(isNaN(receivedDistance)){
+  if (isNaN(receivedDistance)) {
     fatalError.value = true;
     return;
   }
-  
+
   distance.value = receivedDistance;
   showDistance.value = true;
   loading.value = false;
 }
 
-function sendToCalculate(){
-  let pointA = geoInputA.value.getPosition()
-  if(pointA === null){
-    showDistance.value  = false;
+function sendToCalculate() {
+  let pointA = geoInputA.value.getPosition();
+  if (pointA === null) {
+    showDistance.value = false;
   }
-  let pointB = geoInputB.value.getPosition()
-  if(pointB === null){
-    showDistance.value  = false;
+  let pointB = geoInputB.value.getPosition();
+  if (pointB === null) {
+    showDistance.value = false;
   }
 
-  if(pointA === null || pointB === null){
+  if (pointA === null || pointB === null) {
     return;
   }
 
@@ -58,28 +57,26 @@ function sendToCalculate(){
   showDistance.value = false;
   distance.value = -1;
 
-  const params = `lat-a=${pointA.lat}&lon-a=${pointA.lon}&lat-b=${pointB.lat}&lon-b=${pointB.lon}`
-  const url = `/api/calculate.php?${params}`
+  const params = `lat-a=${pointA.lat}&lon-a=${pointA.lon}&lat-b=${pointB.lat}&lon-b=${pointB.lon}`;
+  const url = `/api/calculate.php?${params}`;
   const request = new XMLHttpRequest();
 
-  request.onerror = function(){
+  request.onerror = function () {
     this.abort();
     fatalError.value = true;
-  }
-  request.onload = function(){
-    if(this.status < 200 || this.status > 299){
+  };
+  request.onload = function () {
+    if (this.status < 200 || this.status > 299) {
       this.abort();
       fatalError.value = true;
-    }else{
+    } else {
       displayDistans(this.responseText);
     }
-  }
-  
-  request.open('GET', url, true);
+  };
+
+  request.open("GET", url, true);
   request.send();
-
 }
-
 </script>
 
 <template>
@@ -107,9 +104,10 @@ function sendToCalculate(){
     </div>
     <div class="info-note">
       <p>
-        You can use <strong>d</strong>, <strong>D</strong>, or <strong>°</strong> for degrees;
-        <strong>m</strong>, <strong>M</strong>, or <strong>"</strong> for minutes;
-        and <strong>s</strong>, <strong>S</strong>, or <strong>'</strong> for seconds.
+        You can use <strong>d</strong>, <strong>D</strong>, or
+        <strong>°</strong> for degrees; <strong>m</strong>, <strong>M</strong>,
+        or <strong>"</strong> for minutes; and <strong>s</strong>,
+        <strong>S</strong>, or <strong>'</strong> for seconds.
         <strong>Spaces are optional.</strong>
       </p>
     </div>
@@ -118,7 +116,6 @@ function sendToCalculate(){
     <p>An error occurred. Please try again later.</p>
   </div>
 </template>
-
 
 <style scoped>
 .distance-calculator {
@@ -160,7 +157,7 @@ button:hover {
   background-color: #e0e0e0;
 }
 
-.result-placeholder{
+.result-placeholder {
   min-height: 4rem;
 }
 
@@ -174,12 +171,11 @@ button:hover {
   font-weight: 600;
 }
 @media (max-width: 500px) {
-.title {
-  font-size: 1.0rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  text-align: center;
-}
+  .title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
 }
 </style>
-

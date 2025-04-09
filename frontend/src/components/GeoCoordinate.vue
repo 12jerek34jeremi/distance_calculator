@@ -21,108 +21,116 @@
   - changeWhichForm(newForm): Changes the coordinate format.
 -->
 <script setup>
-  import { ref, computed} from 'vue'
-  import {InvalidAxisError, InvalidFormError} from '@/models/geo_errors.js'
-  import {formatCoordinate,parseCoordinate} from '@/models/utils.js'
+import { ref, computed } from "vue";
+import { InvalidAxisError, InvalidFormError } from "@/models/geo_errors.js";
+import { formatCoordinate, parseCoordinate } from "@/models/utils.js";
 
-  const props = defineProps({
-    whichAxis: String,
-    initialForm: String
-  });
+const props = defineProps({
+  whichAxis: String,
+  initialForm: String,
+});
 
-  const DEGREE = String.fromCharCode(176);
-  const whichAxis = props.whichAxis;
+const DEGREE = String.fromCharCode(176);
+const whichAxis = props.whichAxis;
 
-  const coordinateText = ref('');
-  const displayError = ref(false);
-  const displayEmpty = ref(false);
-  let whichForm = ref(props.initialForm);
+const coordinateText = ref("");
+const displayError = ref(false);
+const displayEmpty = ref(false);
+let whichForm = ref(props.initialForm);
 
-  let inputChanged = false;
-  let floatValue = null;
+let inputChanged = false;
+let floatValue = null;
 
-  const placeHolderText = computed(() => {
-    const newWhichForm = whichForm.value;
-    if(whichAxis == 'lat'){
-      if(newWhichForm=='d'){
-        return `52.207465${DEGREE} N`;
-      }else if(newWhichForm=='dm'){
-        return `52${DEGREE} 12.4479 N`;
-      }else if(newWhichForm=='dms'){
-        return `52${DEGREE} 12' 06.87" N`;
-      }else{
-        throw new InvalidFormError(newWhichForm);
-      }
-    }else if(whichAxis == 'lon'){
-      if(newWhichForm=='d'){
-        return `20.915066${DEGREE} E`;
-      }else if(newWhichForm=='dm'){
-        return `020${DEGREE} 54.904' E`;
-      }else if(newWhichForm=='dms'){
-        return `020${DEGREE} 54' 54.24" E`;
-      }else{
-        throw new InvalidFormError(newWhichForm);
-      }
-    }else{
-      throw new InvalidAxisError(whichAxis);
+const placeHolderText = computed(() => {
+  const newWhichForm = whichForm.value;
+  if (whichAxis == "lat") {
+    if (newWhichForm == "d") {
+      return `52.207465${DEGREE} N`;
+    } else if (newWhichForm == "dm") {
+      return `52${DEGREE} 12.4479 N`;
+    } else if (newWhichForm == "dms") {
+      return `52${DEGREE} 12' 06.87" N`;
+    } else {
+      throw new InvalidFormError(newWhichForm);
     }
-  });
+  } else if (whichAxis == "lon") {
+    if (newWhichForm == "d") {
+      return `20.915066${DEGREE} E`;
+    } else if (newWhichForm == "dm") {
+      return `020${DEGREE} 54.904' E`;
+    } else if (newWhichForm == "dms") {
+      return `020${DEGREE} 54' 54.24" E`;
+    } else {
+      throw new InvalidFormError(newWhichForm);
+    }
+  } else {
+    throw new InvalidAxisError(whichAxis);
+  }
+});
 
-  function updateCoordinate(){
-    const text = coordinateText.value.trim();
+function updateCoordinate() {
+  const text = coordinateText.value.trim();
 
-    if (text == ''){
+  if (text == "") {
+    displayError.value = false;
+    displayEmpty.value = true;
+    floatValue = null;
+  } else {
+    displayEmpty.value = false;
+    floatValue = parseCoordinate(text, whichAxis, whichForm.value);
+    if (floatValue == null) {
+      displayError.value = true;
+    } else {
       displayError.value = false;
-      displayEmpty.value = true;
-      floatValue = null;
-    }else{
-      displayEmpty.value = false;
-      floatValue = parseCoordinate(text, whichAxis, whichForm.value);
-      if (floatValue == null){
-        displayError.value = true;
-      }else{
-        displayError.value = false;
-        coordinateText.value = formatCoordinate(floatValue, whichAxis, whichForm.value);
-      }
+      coordinateText.value = formatCoordinate(
+        floatValue,
+        whichAxis,
+        whichForm.value,
+      );
     }
+  }
 
+  inputChanged = false;
+}
+
+function getCoordinate() {
+  if (inputChanged) updateCoordinate();
+
+  return floatValue;
+}
+
+function changeWhichForm(newWhichForm) {
+  displayEmpty.value = false;
+  displayError.value = false;
+
+  if (inputChanged) {
+    const text = coordinateText.value.trim();
+    if (text == "") {
+      floatValue = null;
+    } else {
+      floatValue = parseCoordinate(text, whichAxis, whichForm.value);
+    }
     inputChanged = false;
   }
 
-  function getCoordinate() {
-    if(inputChanged)
-      updateCoordinate();
-
-    return floatValue;
+  if (floatValue !== null) {
+    coordinateText.value = formatCoordinate(
+      floatValue,
+      whichAxis,
+      newWhichForm,
+    );
   }
 
-  function changeWhichForm(newWhichForm){
-    displayEmpty.value = false;
-    displayError.value = false;
+  whichForm.value = newWhichForm;
+}
 
-    if(inputChanged){
-      const text = coordinateText.value.trim();
-      if(text == ''){
-        floatValue = null;
-      }else{
-        floatValue = parseCoordinate(text, whichAxis, whichForm.value);
-      }
-      inputChanged = false;
-    }
+function onInputCallback(event) {
+  // i didn't have idea how to name it better
+  inputChanged = true;
+  coordinateText.value = event.target.value;
+}
 
-    if(floatValue !== null){
-      coordinateText.value = formatCoordinate(floatValue, whichAxis, newWhichForm);
-    }
-
-    whichForm.value = newWhichForm;
-  }
-
-  function onInputCallback(event){ // i didn't have idea how to name it better
-    inputChanged = true;
-    coordinateText.value = event.target.value;
-  }
-
-  defineExpose({getCoordinate, changeWhichForm});
+defineExpose({ getCoordinate, changeWhichForm });
 </script>
 
 <template>
@@ -136,7 +144,9 @@
       class="input-field"
     />
     <div class="error-message-box">
-      <p v-show="displayError" class="error-text">The above is not a valid coordinate!</p>
+      <p v-show="displayError" class="error-text">
+        The above is not a valid coordinate!
+      </p>
       <p v-show="displayEmpty" class="error-text">Insert a coordinate!</p>
     </div>
   </div>
@@ -158,7 +168,7 @@
 
 .input-field:focus {
   outline: none;
-  border-color: #007BFF;
+  border-color: #007bff;
   box-shadow: 0 0 3px rgba(0, 123, 255, 0.4);
 }
 
