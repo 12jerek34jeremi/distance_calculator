@@ -10,7 +10,10 @@ import {
   InvalidAxisError,
   InvalidFormError,
   InvalidCoordRangeError,
-} from "@/models/geo_errors.js";
+} from "@/models/geo_errors.ts";
+
+import { type Form, type Axis, type numInt, type numFloat, type Nullable} from "@/models/types.ts";
+
 
 /**
  * Pads or trims a string to ensure it has exactly `n` characters.
@@ -21,7 +24,7 @@ import {
  * - If the string is already of length `n`, it is returned as-is.
  *
  * @param {string} toPad - The input string to be padded or trimmed.
- * @param {number} n - The desired final length of the string.
+ * @param {numInt} n - The desired final length of the string.
  *
  * @returns {string} A string of exactly `n` characters.
  *
@@ -32,13 +35,13 @@ import {
  * padOrCut("000123", 3);   // "123"
  * padOrCut("1234", 2);     // Error: invalid trim
  */
-function padOrCut(toPad, n) {
+function padOrCut(toPad: string, n: numInt): string{
   if (toPad.length == n) {
     return toPad;
   } else if (toPad.length < n) {
     return "0".repeat(Math.max(0, n - toPad.length)) + toPad;
   } else {
-    const toCut = toPad.length - n;
+    const toCut: numInt = toPad.length - n;
     if (toPad.slice(0, toCut) != "0".repeat(toCut)) {
       throw new Error(`Invalud padOrCut arguments: '${toPad}' and '${n}'.`);
     }
@@ -46,7 +49,7 @@ function padOrCut(toPad, n) {
   }
 }
 
-function removeTralingZeros(fracPart) {
+function removeTralingZeros(fracPart: string): string{
   fracPart = fracPart.replace(/0+$/, "");
   if (fracPart == "") fracPart = "0";
   return fracPart;
@@ -56,10 +59,10 @@ function removeTralingZeros(fracPart) {
  * Splits a floating-point number into its integer and fractional parts as strings. Intiger part has
  * specified number of digits, fractional part has specified maximum number of digits.
  *
- * @param {number} number - The number to split.
- * @param {number} intPartDigits - Minimum number of digits for the integer part (zero-padded if
+ * @param {numFloat} number - The number to split.
+ * @param {numInt} intPartDigits - Minimum number of digits for the integer part (zero-padded if
  * necessary).
- * @param {number} fractionPartMaxDigids - Maximum number of digits for the fractional part.
+ * @param {numInt} fractionPartMaxDigids - Maximum number of digits for the fractional part.
  *
  * @returns {[string, string]} - intiger and fractional parts
  *
@@ -67,8 +70,15 @@ function removeTralingZeros(fracPart) {
  * splitFloat(5.2, 3, 4);  // ["005", "2"]
  * splitFloat(12.3456, 2, 3);  // ["12", "346"]
  */
-function splitFloat(number, intPartDigits, fractionPartMaxDigids) {
-  let [intPart, fracPart] = number.toFixed(fractionPartMaxDigids).split(".");
+function splitFloat(number: numFloat, intPartDigits: numInt, fractionPartMaxDigids: numInt) : [string, string] {
+
+  let splitResult: string[] = number.toFixed(fractionPartMaxDigids).split(".");
+
+  if(splitResult.length != 2){
+    throw Error(`Invalid float to split: ${number}`);
+  }
+  let [intPart, fracPart]: [string, string] = splitResult as [string, string];
+
   intPart = padOrCut(intPart, intPartDigits);
   fracPart = removeTralingZeros(fracPart);
   return [intPart, fracPart];
@@ -77,7 +87,7 @@ function splitFloat(number, intPartDigits, fractionPartMaxDigids) {
 /**
  * Formats a geographic coordinate (latitude or longitude) into a human-readable string.
  *
- * @param {number} value - The coordinate value in decimal degrees.
+ * @param {numFloat} value - The coordinate value in decimal degrees.
  *                         Positive for N/E, negative for S/W.
  * @param {string} whichAxis - Indicates the axis: 'lat' for latitude or 'lon' for longitude.
  * @param {string} whichForm - Desired format of the output:
@@ -92,13 +102,13 @@ function splitFloat(number, intPartDigits, fractionPartMaxDigids) {
  * formatCoordinate(-123.456, 'lon', 'dm');    // "123° 27.3600' W"
  * formatCoordinate(78.9, 'lat', 'dms');       // "78° 54' 00.00\" N"
  */
-function formatCoordinate(value, whichAxis, whichForm) {
+function formatCoordinate(value: numFloat, whichAxis: Axis, whichForm: Form) : string{
   const DEGREE = String.fromCharCode(176); // ASCII-safe degree symbol
 
-  const degFloat = Math.abs(value);
+  const degFloat: numFloat = Math.abs(value);
 
-  let direction = "";
-  let maxDigids = 0;
+  let direction: string = "";
+  let maxDigids: numInt = 0;
   if (whichAxis == "lat") {
     if (value < -90.0 || value > 90.0)
       throw new InvalidCoordRangeError(value, whichAxis);
@@ -117,26 +127,26 @@ function formatCoordinate(value, whichAxis, whichForm) {
 
   if (whichForm == "d") {
     // DD.Fdeg N/S or DDD.Fdeg E/W
-    const [intPart, fracPart] = splitFloat(degFloat, maxDigids, 6);
+    const [intPart, fracPart]: [string, string] = splitFloat(degFloat, maxDigids, 6);
     return `${intPart}.${fracPart}${DEGREE} ${direction}`;
   } else if (whichForm == "dm") {
     // DDdeg MM.F N/S or DDDdeg MM.F E/W
-    const degInt = Math.floor(degFloat);
-    const minutesFloat = (degFloat - degInt) * 60;
+    const degInt: numInt = Math.floor(degFloat);
+    const minutesFloat: numFloat = (degFloat - degInt) * 60;
 
-    const degStr = padOrCut(degInt.toString(), maxDigids);
-    const [intPart, fracPart] = splitFloat(minutesFloat, 2, 4);
+    const degStr: string = padOrCut(degInt.toString(), maxDigids);
+    const [intPart, fracPart]: [string, string] = splitFloat(minutesFloat, 2, 4);
     return `${degStr}${DEGREE} ${intPart}.${fracPart}' ${direction}`;
   } else if (whichForm == "dms") {
     // DDdeg MM' SS.F" N/S or DDDdeg MM' SS.F" E/W
-    const degInt = Math.floor(degFloat);
-    const minutesFloat = (degFloat - degInt) * 60;
-    const minutesInt = Math.floor(minutesFloat);
-    const secondsFloat = (minutesFloat - minutesInt) * 60;
+    const degInt: numInt = Math.floor(degFloat);
+    const minutesFloat: numFloat = (degFloat - degInt) * 60;
+    const minutesInt: numInt = Math.floor(minutesFloat);
+    const secondsFloat: numFloat = (minutesFloat - minutesInt) * 60;
 
-    const degStr = padOrCut(degInt.toString(), maxDigids);
-    const minutesStr = padOrCut(minutesInt.toString(), 2);
-    const [intPart, fracPart] = splitFloat(secondsFloat, 2, 2);
+    const degStr: string = padOrCut(degInt.toString(), maxDigids);
+    const minutesStr: string = padOrCut(minutesInt.toString(), 2);
+    const [intPart, fracPart]: [string, string] = splitFloat(secondsFloat, 2, 2);
     return `${degStr}${DEGREE} ${minutesStr}' ${intPart}.${fracPart}" ${direction}`;
   } else {
     throw new InvalidFormError(whichForm);
@@ -162,7 +172,7 @@ function formatCoordinate(value, whichAxis, whichForm) {
  * parseCoordinate("123D27.36M W", "lon", "dm");   // -123.456
  * parseCoordinate("78D54M00.00S", "lat", "dms");  // -78.9
  */
-function parseCoordinate(coord, whichAxis, whichForm) {
+function parseCoordinate(coord: string, whichAxis: Axis, whichForm: Form) : Nullable<numFloat>{
   if (whichAxis != "lat" && whichAxis != "lon")
     throw new InvalidAxisError(whichAxis);
   const isLat = whichAxis == "lat";
@@ -175,16 +185,16 @@ function parseCoordinate(coord, whichAxis, whichForm) {
     .replace(/["”]/g, "S") // Normalize seconds
     .replace(/\s+/g, ""); // Remove all whitespace
 
-  let absValue;
-  let sense;
+  let absValue: numFloat;
+  let sense: string;
 
   if (whichForm == "d") {
     let regex = /^(\d+)(?:[.,](\d+))?D?([sSnNeEwW])$/;
     let match = coord.match(regex);
     if (match === null) return null;
 
-    let deg = match[1];
-    let fraction = match[2] == null ? "0" : match[2];
+    let deg: string = match[1];
+    let fraction : string = match[2] == null ? "0" : match[2];
     sense = match[3];
 
     if (parseInt(deg) > maxValue) return null;
@@ -194,9 +204,9 @@ function parseCoordinate(coord, whichAxis, whichForm) {
     let match = coord.match(regex);
     if (match === null) return null;
 
-    let deg = match[1];
-    let minutes = match[2] == null ? "0" : match[2];
-    let fraction = match[3] == null ? "0" : match[3];
+    let deg: string = match[1];
+    let minutes: string = match[2] == null ? "0" : match[2];
+    let fraction: string = match[3] == null ? "0" : match[3];
     sense = match[4];
 
     if (parseInt(deg) > maxValue || parseInt(minutes) > 59) return null;
@@ -207,9 +217,9 @@ function parseCoordinate(coord, whichAxis, whichForm) {
 
     if (match === null) return null;
 
-    let deg = match[1];
-    let minutes = match[2] == null ? "0" : match[2];
-    let seconds = match[3] == null ? "0" : match[3];
+    let deg: string = match[1];
+    let minutes: string = match[2] == null ? "0" : match[2];
+    let seconds: string = match[3] == null ? "0" : match[3];
     let fraction = match[4] == null ? "0" : match[4];
     sense = match[5];
 
@@ -227,7 +237,7 @@ function parseCoordinate(coord, whichAxis, whichForm) {
     throw new InvalidFormError(whichForm);
   }
 
-  let floatValue;
+  let floatValue: numFloat;
   if (whichAxis == "lat") {
     if (absValue > 90.0) return null;
     if (sense != "N" && sense != "S") return null;

@@ -20,7 +20,7 @@
 
 <script setup>
 import { ref, useTemplateRef, watch } from "vue";
-import GeoPoint from "@/models/geo_point.js";
+import GeoPoint from "@/models/geo_point.ts";
 import GeoCoordinate from "@/components/GeoCoordinate.vue";
 
 const props = defineProps({

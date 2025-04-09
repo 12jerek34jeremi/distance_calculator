@@ -22,8 +22,8 @@
 -->
 <script setup>
 import { ref, computed } from "vue";
-import { InvalidAxisError, InvalidFormError } from "@/models/geo_errors.js";
-import { formatCoordinate, parseCoordinate } from "@/models/utils.js";
+import { InvalidAxisError, InvalidFormError } from "@/models/geo_errors.ts";
+import { formatCoordinate, parseCoordinate } from "@/models/utils.ts";
 
 const props = defineProps({
   whichAxis: String,
@@ -125,7 +125,7 @@ function changeWhichForm(newWhichForm) {
 }
 
 function onInputCallback(event) {
-  // i didn't have idea how to name it better
+  // I didn't have idea how to name it better
   inputChanged = true;
   coordinateText.value = event.target.value;
 }
