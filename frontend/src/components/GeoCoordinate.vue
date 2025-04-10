@@ -70,13 +70,11 @@ const placeHolderText = computed<string>(() => {
   }
 })
 
-function updateCoordinate(): void {
+function updateCoordinate(updateErrors: boolean = true): void {
   if (!inputChanged) {
-    console.log('in update coordinate, skipping')
     return
   }
 
-  console.log('in update coordinate, working')
   const text: string = coordinateText.value.trim()
 
   if (text == '') {
@@ -94,40 +92,37 @@ function updateCoordinate(): void {
     }
   }
 
+  if (updateErrors) {
+    displayError.value = displayError.value
+    displayEmpty.value = displayEmpty.value
+  }
+
   inputChanged = false
 }
 
 function getCoordinate(): Nullable<numFloat> {
-  console.log('in get coordinate')
   if (inputChanged) updateCoordinate()
-
   return floatValue
 }
 
 function changeWhichForm(newWhichForm: Form): void {
-  console.log('in change coordinate')
   displayEmpty.value = false
   displayError.value = false
 
   if (inputChanged) {
-    const text: string = coordinateText.value.trim()
-    if (text == '') {
-      floatValue = null
-    } else {
-      floatValue = parseCoordinate(text, whichAxis, whichForm.value)
-    }
-    inputChanged = false
+    floatValue = parseCoordinate(coordinateText.value, whichAxis, whichForm.value)
   }
 
-  if (floatValue !== null) {
+  if (floatValue === null)
+    floatValue = parseCoordinate(coordinateText.value, whichAxis, newWhichForm)
+
+  if (floatValue !== null)
     coordinateText.value = formatCoordinate(floatValue, whichAxis, newWhichForm)
-  }
 
   whichForm.value = newWhichForm
 }
 
 function onInputCallback(event: any): void {
-  console.log('in onInputCallback!')
   coordinateText.value = event.currentTarget.value
   inputChanged = true
 }
@@ -140,7 +135,7 @@ defineExpose({ getCoordinate, changeWhichForm })
     <input
       type="text"
       @input="onInputCallback"
-      @blur="updateCoordinate"
+      @blur="updateCoordinate(true)"
       :placeholder="placeHolderText"
       :value="coordinateText"
       class="input-field"

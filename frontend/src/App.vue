@@ -61,10 +61,11 @@ function sendToCalculate(): void {
   showDistance.value = false
   distance.value = -1
 
-  const params = `lat-a=${(pointA as GeoPoint).lat}`+
-                 `&lon-a=${(pointA as GeoPoint).lon}`+
-                 `&lat-b=${(pointB as GeoPoint).lat}`+
-                 `&lon-b=${(pointB as GeoPoint).lon}`;
+  const params =
+    `lat-a=${(pointA as GeoPoint).lat}` +
+    `&lon-a=${(pointA as GeoPoint).lon}` +
+    `&lat-b=${(pointB as GeoPoint).lat}` +
+    `&lon-b=${(pointB as GeoPoint).lon}`
 
   const url = `/api/calculate.php?${params}`
   const request = new XMLHttpRequest()

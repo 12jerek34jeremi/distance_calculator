@@ -1,9 +1,10 @@
 import { expect, test } from 'vitest'
 import { formatCoordinate, parseCoordinate } from '@/models/utils.js'
+import type { Form, numFloat, Axis } from '@/models/types'
 
 const DG = String.fromCharCode(176) // ASCII-safe degree symbol
 
-const validCoordinates = [
+const validCoordinates: [Form, Axis, string, numFloat, string[]][] = [
   // Decimal degrees - Latitude
   [`d`, `lat`, `45.5${DG} N`, 45.5, [`45.5dn`, `45.5 n`, `45.5 ${DG} N`, `045.5D N`, `045,5dN `]],
   [`d`, `lat`, `12.25${DG} S`, -12.25, [`12.25 s`, `012.25dS`, `12,25°s`, `12.25Ds `]],
@@ -53,7 +54,7 @@ const validCoordinates = [
   ],
 ]
 
-const invalidCoordinates = [
+const invalidCoordinates: [Form, Axis, string[]][] = [
   ['d', 'lat', ['45.5', '45k.5 n', `45.5${DG}D N`, '45D30.5MN']],
   ['d', 'lon', ['181.0E', '100.0Q', `120${DG}${DG} W`, '120.0M E']],
 
@@ -85,3 +86,77 @@ test('parseCoordinateInvalid', () => {
     }
   }
 })
+
+function maybeMutateString(coordString: string) {
+  if (Math.random() < 0.1) {
+    coordString = coordString.replace(/'/g, Math.random() < 0.5 ? 'M' : 'm')
+  }
+
+  if (Math.random() < 0.1) {
+    coordString = coordString.replace(/"/g, Math.random() < 0.5 ? 's' : 'S')
+  }
+
+  if (Math.random() < 0.1) {
+    const possibleSpacesNr = [1, 1, 1, 1, 2, 2, 3, 4, 5, 6]
+    const numSpaces = possibleSpacesNr[Math.floor(Math.random() * possibleSpacesNr.length)]
+    for (let i = 0; i < numSpaces; i++) {
+      const pos = Math.floor(Math.random() * (coordString.length + 1))
+      coordString = coordString.slice(0, pos) + ' ' + coordString.slice(pos)
+    }
+  }
+
+  return coordString
+}
+
+test('twoWaysRandomConversion', () => {
+  for (let i = 0; i < 10000; i++) {
+    const whichAxis: Axis = Math.random() < 0.5 ? 'lat' : 'lon'
+    const whichForm: Form = (['d', 'dm', 'dms'] as Form[])[Math.floor(Math.random() * 3)]
+
+    const range: [numFloat, numFloat] = whichAxis == 'lat' ? [-90.0, 90.0] : [-180.0, 180.0]
+    let floatValueOr = Math.random() * (range[1] - range[0]) + range[0]
+    floatValueOr = Math.round(floatValueOr * 1_00_00) / 1_00_00
+
+    let coordText = formatCoordinate(floatValueOr, whichAxis, whichForm)
+    coordText = maybeMutateString(coordText);
+    let floatValueTr = parseCoordinate(coordText, whichAxis, whichForm)
+
+    expect(floatValueTr).not.toBeNull()
+
+    floatValueTr = floatValueTr as numFloat
+
+    if (Math.abs(floatValueOr - floatValueTr) > 0.000011) {
+      console.log(floatValueOr, coordText, floatValueTr)
+      expect(2).toBe(4)
+    }
+  }
+})
+
+test('twoWaysConversionEdgeCases', () => {
+  const testCases: { value: numFloat; axis: Axis }[] = [
+    { value: -90.0, axis: 'lat' },
+    { value: 90.0, axis: 'lat' },
+    { value: -180.0, axis: 'lon' },
+    { value: 180.0, axis: 'lon' },
+  ]
+
+  const forms: Form[] = ['d', 'dm', 'dms']
+
+  for (const { value, axis } of testCases) {
+    for (const form of forms) {
+      let coordText = formatCoordinate(value, axis, form)
+      let floatValueTr = parseCoordinate(coordText, axis, form)
+      coordText = maybeMutateString(coordText);
+
+      expect(floatValueTr).not.toBeNull()
+
+      floatValueTr = floatValueTr as numFloat
+
+      if (Math.abs(value - floatValueTr) > 0.000011) {
+        console.log(value, coordText, floatValueTr)
+        expect(2).toBe(4) // Force fail to inspect
+      }
+    }
+  }
+})
+

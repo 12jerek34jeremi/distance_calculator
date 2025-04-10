@@ -113,7 +113,7 @@ function formatCoordinate(value: numFloat, whichAxis: Axis, whichForm: Form): st
     if (value >= 0) direction = 'N'
     else direction = 'S'
   } else if (whichAxis == 'lon') {
-    if (value < -90.0 || value > 180.0) throw new InvalidCoordRangeError(value, whichAxis)
+    if (value < -180.0 || value > 180.0) throw new InvalidCoordRangeError(value, whichAxis)
     maxDigids = 3
     if (value >= 0) direction = 'E'
     else direction = 'W'
@@ -123,26 +123,40 @@ function formatCoordinate(value: numFloat, whichAxis: Axis, whichForm: Form): st
 
   if (whichForm == 'd') {
     // DD.Fdeg N/S or DDD.Fdeg E/W
-    const [intPart, fracPart]: [string, string] = splitFloat(degFloat, maxDigids, 6)
+    const [intPart, fracPart]: [string, string] = splitFloat(degFloat, maxDigids, 5)
     return `${intPart}.${fracPart}${DEGREE} ${direction}`
   } else if (whichForm == 'dm') {
     // DDdeg MM.F N/S or DDDdeg MM.F E/W
-    const degInt: numInt = Math.floor(degFloat)
-    const minutesFloat: numFloat = (degFloat - degInt) * 60
+    let degInt: numInt = Math.floor(degFloat)
+    let minutesFloat: numFloat = (degFloat - degInt) * 60
+
+    if (Math.round(minutesFloat * 10_000) == 600_000) {
+      minutesFloat = 0.0
+      degInt += 1
+    }
 
     const degStr: string = padOrCut(degInt.toString(), maxDigids)
     const [intPart, fracPart]: [string, string] = splitFloat(minutesFloat, 2, 4)
     return `${degStr}${DEGREE} ${intPart}.${fracPart}' ${direction}`
   } else if (whichForm == 'dms') {
     // DDdeg MM' SS.F" N/S or DDDdeg MM' SS.F" E/W
-    const degInt: numInt = Math.floor(degFloat)
-    const minutesFloat: numFloat = (degFloat - degInt) * 60
-    const minutesInt: numInt = Math.floor(minutesFloat)
-    const secondsFloat: numFloat = (minutesFloat - minutesInt) * 60
+    let degInt: numInt = Math.floor(degFloat)
+    let minutesFloat: numFloat = (degFloat - degInt) * 60
+    let minutesInt: numInt = Math.floor(minutesFloat)
+    let secondsFloat: numFloat = (minutesFloat - minutesInt) * 60
+
+    if (Math.round(secondsFloat * 10) == 600) {
+      secondsFloat = 0.0
+      minutesInt += 1
+    }
+    if (minutesInt == 60) {
+      minutesInt = 0
+      degInt += 1
+    }
 
     const degStr: string = padOrCut(degInt.toString(), maxDigids)
     const minutesStr: string = padOrCut(minutesInt.toString(), 2)
-    const [intPart, fracPart]: [string, string] = splitFloat(secondsFloat, 2, 2)
+    const [intPart, fracPart]: [string, string] = splitFloat(secondsFloat, 2, 1)
     return `${degStr}${DEGREE} ${minutesStr}' ${intPart}.${fracPart}" ${direction}`
   } else {
     throw new InvalidFormError(whichForm)
@@ -235,7 +249,7 @@ function parseCoordinate(coord: string, whichAxis: Axis, whichForm: Form): Nulla
     floatValue = sense == 'E' ? absValue : -absValue
   }
 
-  return Math.round(floatValue * 1_000_000) / 1_000_000 //round to 6 decimal places
+  return Math.round(floatValue * 100_000) / 100_000 //round to 5 decimal places
 }
 
 export { formatCoordinate, parseCoordinate }
