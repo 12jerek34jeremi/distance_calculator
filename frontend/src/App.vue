@@ -32,7 +32,7 @@ function displayDistans(responseText: string): void {
     fatalError.value = true
     return
   }
-  let receivedDistance = parseInt(responseText)
+  const receivedDistance = parseInt(responseText)
   if (isNaN(receivedDistance)) {
     fatalError.value = true
     return
@@ -44,11 +44,11 @@ function displayDistans(responseText: string): void {
 }
 
 function sendToCalculate(): void {
-  let pointA = geoInputA.value?.getPosition()
+  const pointA = geoInputA.value?.getPosition()
   if (pointA === null) {
     showDistance.value = false
   }
-  let pointB = geoInputB.value?.getPosition()
+  const pointB = geoInputB.value?.getPosition()
   if (pointB === null) {
     showDistance.value = false
   }

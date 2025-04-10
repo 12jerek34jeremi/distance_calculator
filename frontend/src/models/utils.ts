@@ -70,7 +70,7 @@ function splitFloat(
   intPartDigits: numInt,
   fractionPartMaxDigids: numInt,
 ): [string, string] {
-  let splitResult: string[] = number.toFixed(fractionPartMaxDigids).split('.')
+  const splitResult: string[] = number.toFixed(fractionPartMaxDigids).split('.')
 
   if (splitResult.length != 2) {
     throw Error(`Invalid float to split: ${number}`)
@@ -141,7 +141,7 @@ function formatCoordinate(value: numFloat, whichAxis: Axis, whichForm: Form): st
   } else if (whichForm == 'dms') {
     // DDdeg MM' SS.F" N/S or DDDdeg MM' SS.F" E/W
     let degInt: numInt = Math.floor(degFloat)
-    let minutesFloat: numFloat = (degFloat - degInt) * 60
+    const minutesFloat: numFloat = (degFloat - degInt) * 60
     let minutesInt: numInt = Math.floor(minutesFloat)
     let secondsFloat: numFloat = (minutesFloat - minutesInt) * 60
 
@@ -198,38 +198,38 @@ function parseCoordinate(coord: string, whichAxis: Axis, whichForm: Form): Nulla
   let sense: string
 
   if (whichForm == 'd') {
-    let regex = /^(\d+)(?:[.,](\d+))?D?([sSnNeEwW])$/
-    let match = coord.match(regex)
+    const regex = /^(\d+)(?:[.,](\d+))?D?([sSnNeEwW])$/
+    const match = coord.match(regex)
     if (match === null) return null
 
-    let deg: string = match[1]
-    let fraction: string = match[2] == null ? '0' : match[2]
+    const deg: string = match[1]
+    const fraction: string = match[2] == null ? '0' : match[2]
     sense = match[3]
 
     if (parseInt(deg) > maxValue) return null
     absValue = parseFloat(`${deg}.${fraction}`)
   } else if (whichForm == 'dm') {
-    let regex = /^(\d+)D(?:(\d+)(?:[,.](\d+))?M)?([sSnNeEwW])$/
-    let match = coord.match(regex)
+    const regex = /^(\d+)D(?:(\d+)(?:[,.](\d+))?M)?([sSnNeEwW])$/
+    const match = coord.match(regex)
     if (match === null) return null
 
-    let deg: string = match[1]
-    let minutes: string = match[2] == null ? '0' : match[2]
-    let fraction: string = match[3] == null ? '0' : match[3]
+    const deg: string = match[1]
+    const minutes: string = match[2] == null ? '0' : match[2]
+    const fraction: string = match[3] == null ? '0' : match[3]
     sense = match[4]
 
     if (parseInt(deg) > maxValue || parseInt(minutes) > 59) return null
     absValue = parseInt(deg) + parseFloat(`${minutes}.${fraction}`) / 60
   } else if (whichForm == 'dms') {
-    let regex = /^(\d+)D(?:(\d+)M(?:(\d+)(?:[,.](\d+))?S)?)?([sSnNeEwW])$/
-    let match = coord.match(regex)
+    const regex = /^(\d+)D(?:(\d+)M(?:(\d+)(?:[,.](\d+))?S)?)?([sSnNeEwW])$/
+    const match = coord.match(regex)
 
     if (match === null) return null
 
-    let deg: string = match[1]
-    let minutes: string = match[2] == null ? '0' : match[2]
-    let seconds: string = match[3] == null ? '0' : match[3]
-    let fraction = match[4] == null ? '0' : match[4]
+    const deg: string = match[1]
+    const minutes: string = match[2] == null ? '0' : match[2]
+    const seconds: string = match[3] == null ? '0' : match[3]
+    const fraction = match[4] == null ? '0' : match[4]
     sense = match[5]
 
     if (parseInt(deg) > maxValue || parseInt(minutes) > 59 || parseInt(seconds) > 59) return null

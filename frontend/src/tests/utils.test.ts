@@ -118,7 +118,7 @@ test('twoWaysRandomConversion', () => {
     floatValueOr = Math.round(floatValueOr * 1_00_00) / 1_00_00
 
     let coordText = formatCoordinate(floatValueOr, whichAxis, whichForm)
-    coordText = maybeMutateString(coordText);
+    coordText = maybeMutateString(coordText)
     let floatValueTr = parseCoordinate(coordText, whichAxis, whichForm)
 
     expect(floatValueTr).not.toBeNull()
@@ -146,7 +146,7 @@ test('twoWaysConversionEdgeCases', () => {
     for (const form of forms) {
       let coordText = formatCoordinate(value, axis, form)
       let floatValueTr = parseCoordinate(coordText, axis, form)
-      coordText = maybeMutateString(coordText);
+      coordText = maybeMutateString(coordText)
 
       expect(floatValueTr).not.toBeNull()
 
@@ -159,4 +159,3 @@ test('twoWaysConversionEdgeCases', () => {
     }
   }
 })
-

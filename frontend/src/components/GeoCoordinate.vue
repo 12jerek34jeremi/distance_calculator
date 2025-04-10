@@ -38,7 +38,7 @@ const whichAxis = props.whichAxis
 const coordinateText: Ref<string> = ref('')
 const displayError: Ref<boolean> = ref(false)
 const displayEmpty: Ref<boolean> = ref(false)
-let whichForm: Ref<Form> = ref(props.initialForm)
+const whichForm: Ref<Form> = ref(props.initialForm)
 
 let inputChanged: boolean = false
 let floatValue: Nullable<numFloat> = null
@@ -70,7 +70,7 @@ const placeHolderText = computed<string>(() => {
   }
 })
 
-function updateCoordinate(updateErrors: boolean = true): void {
+function updateCoordinate(): void {
   if (!inputChanged) {
     return
   }
@@ -90,11 +90,6 @@ function updateCoordinate(updateErrors: boolean = true): void {
       displayError.value = false
       coordinateText.value = formatCoordinate(floatValue, whichAxis, whichForm.value)
     }
-  }
-
-  if (updateErrors) {
-    displayError.value = displayError.value
-    displayEmpty.value = displayEmpty.value
   }
 
   inputChanged = false
@@ -135,7 +130,7 @@ defineExpose({ getCoordinate, changeWhichForm })
     <input
       type="text"
       @input="onInputCallback"
-      @blur="updateCoordinate(true)"
+      @blur="updateCoordinate"
       :placeholder="placeHolderText"
       :value="coordinateText"
       class="input-field"

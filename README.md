@@ -99,3 +99,8 @@ cd frontend
 npm install
 npm run test
 ```
+
+
+## To Do
+1) Write component tests: [link](https://test-utils.vuejs.org/guide/essentials/a-crash-course.html)
+2) PHP tests
