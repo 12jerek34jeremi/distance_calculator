@@ -20,117 +20,119 @@
         Returns `null` if the input is empty or invalid.
   - changeWhichForm(newForm): Changes the coordinate format.
 -->
-<script setup>
-import { ref, computed } from "vue";
-import { InvalidAxisError, InvalidFormError } from "@/models/geo_errors.ts";
-import { formatCoordinate, parseCoordinate } from "@/models/utils.ts";
+<script setup lang="ts">
+import { ref, computed } from 'vue'
+import type { Ref } from 'vue'
+import { InvalidAxisError, InvalidFormError } from '@/models/geo_errors.ts'
+import { formatCoordinate, parseCoordinate } from '@/models/utils.ts'
+import { type Form, type Axis, type numFloat, type Nullable } from '@/models/types.ts'
 
-const props = defineProps({
-  whichAxis: String,
-  initialForm: String,
-});
+const props = defineProps<{
+  whichAxis: Axis
+  initialForm: Form
+}>()
 
-const DEGREE = String.fromCharCode(176);
-const whichAxis = props.whichAxis;
+const DEGREE = String.fromCharCode(176)
+const whichAxis = props.whichAxis
 
-const coordinateText = ref("");
-const displayError = ref(false);
-const displayEmpty = ref(false);
-let whichForm = ref(props.initialForm);
+const coordinateText: Ref<string> = ref('')
+const displayError: Ref<boolean> = ref(false)
+const displayEmpty: Ref<boolean> = ref(false)
+let whichForm: Ref<Form> = ref(props.initialForm)
 
-let inputChanged = false;
-let floatValue = null;
+let inputChanged: boolean = false
+let floatValue: Nullable<numFloat> = null
 
-const placeHolderText = computed(() => {
-  const newWhichForm = whichForm.value;
-  if (whichAxis == "lat") {
-    if (newWhichForm == "d") {
-      return `52.207465${DEGREE} N`;
-    } else if (newWhichForm == "dm") {
-      return `52${DEGREE} 12.4479 N`;
-    } else if (newWhichForm == "dms") {
-      return `52${DEGREE} 12' 06.87" N`;
+const placeHolderText = computed<string>(() => {
+  const newWhichForm: Form = whichForm.value
+  if (whichAxis == 'lat') {
+    if (newWhichForm == 'd') {
+      return `52.207465${DEGREE} N`
+    } else if (newWhichForm == 'dm') {
+      return `52${DEGREE} 12.4479 N`
+    } else if (newWhichForm == 'dms') {
+      return `52${DEGREE} 12' 06.87" N`
     } else {
-      throw new InvalidFormError(newWhichForm);
+      throw new InvalidFormError(newWhichForm)
     }
-  } else if (whichAxis == "lon") {
-    if (newWhichForm == "d") {
-      return `20.915066${DEGREE} E`;
-    } else if (newWhichForm == "dm") {
-      return `020${DEGREE} 54.904' E`;
-    } else if (newWhichForm == "dms") {
-      return `020${DEGREE} 54' 54.24" E`;
+  } else if (whichAxis == 'lon') {
+    if (newWhichForm == 'd') {
+      return `20.915066${DEGREE} E`
+    } else if (newWhichForm == 'dm') {
+      return `020${DEGREE} 54.904' E`
+    } else if (newWhichForm == 'dms') {
+      return `020${DEGREE} 54' 54.24" E`
     } else {
-      throw new InvalidFormError(newWhichForm);
+      throw new InvalidFormError(newWhichForm)
     }
   } else {
-    throw new InvalidAxisError(whichAxis);
+    throw new InvalidAxisError(whichAxis)
   }
-});
+})
 
-function updateCoordinate() {
-  const text = coordinateText.value.trim();
+function updateCoordinate(): void {
+  if (!inputChanged) {
+    console.log('in update coordinate, skipping')
+    return
+  }
 
-  if (text == "") {
-    displayError.value = false;
-    displayEmpty.value = true;
-    floatValue = null;
+  console.log('in update coordinate, working')
+  const text: string = coordinateText.value.trim()
+
+  if (text == '') {
+    displayError.value = false
+    displayEmpty.value = true
+    floatValue = null
   } else {
-    displayEmpty.value = false;
-    floatValue = parseCoordinate(text, whichAxis, whichForm.value);
+    displayEmpty.value = false
+    floatValue = parseCoordinate(text, whichAxis, whichForm.value)
     if (floatValue == null) {
-      displayError.value = true;
+      displayError.value = true
     } else {
-      displayError.value = false;
-      coordinateText.value = formatCoordinate(
-        floatValue,
-        whichAxis,
-        whichForm.value,
-      );
+      displayError.value = false
+      coordinateText.value = formatCoordinate(floatValue, whichAxis, whichForm.value)
     }
   }
 
-  inputChanged = false;
+  inputChanged = false
 }
 
-function getCoordinate() {
-  if (inputChanged) updateCoordinate();
+function getCoordinate(): Nullable<numFloat> {
+  console.log('in get coordinate')
+  if (inputChanged) updateCoordinate()
 
-  return floatValue;
+  return floatValue
 }
 
-function changeWhichForm(newWhichForm) {
-  displayEmpty.value = false;
-  displayError.value = false;
+function changeWhichForm(newWhichForm: Form): void {
+  console.log('in change coordinate')
+  displayEmpty.value = false
+  displayError.value = false
 
   if (inputChanged) {
-    const text = coordinateText.value.trim();
-    if (text == "") {
-      floatValue = null;
+    const text: string = coordinateText.value.trim()
+    if (text == '') {
+      floatValue = null
     } else {
-      floatValue = parseCoordinate(text, whichAxis, whichForm.value);
+      floatValue = parseCoordinate(text, whichAxis, whichForm.value)
     }
-    inputChanged = false;
+    inputChanged = false
   }
 
   if (floatValue !== null) {
-    coordinateText.value = formatCoordinate(
-      floatValue,
-      whichAxis,
-      newWhichForm,
-    );
+    coordinateText.value = formatCoordinate(floatValue, whichAxis, newWhichForm)
   }
 
-  whichForm.value = newWhichForm;
+  whichForm.value = newWhichForm
 }
 
-function onInputCallback(event) {
-  // I didn't have idea how to name it better
-  inputChanged = true;
-  coordinateText.value = event.target.value;
+function onInputCallback(event: any): void {
+  console.log('in onInputCallback!')
+  coordinateText.value = event.currentTarget.value
+  inputChanged = true
 }
 
-defineExpose({ getCoordinate, changeWhichForm });
+defineExpose({ getCoordinate, changeWhichForm })
 </script>
 
 <template>
@@ -144,9 +146,7 @@ defineExpose({ getCoordinate, changeWhichForm });
       class="input-field"
     />
     <div class="error-message-box">
-      <p v-show="displayError" class="error-text">
-        The above is not a valid coordinate!
-      </p>
+      <p v-show="displayError" class="error-text">The above is not a valid coordinate!</p>
       <p v-show="displayEmpty" class="error-text">Insert a coordinate!</p>
     </div>
   </div>

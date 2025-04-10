@@ -18,38 +18,41 @@
                    `null` if either input is empty or invalid.
 -->
 
-<script setup>
-import { ref, useTemplateRef, watch } from "vue";
-import GeoPoint from "@/models/geo_point.ts";
-import GeoCoordinate from "@/components/GeoCoordinate.vue";
+<script setup lang="ts">
+import { ref, useTemplateRef, watch } from 'vue'
+import type { Ref } from 'vue'
+import GeoPoint from '@/models/geo_point.ts'
+import GeoCoordinate from '@/components/GeoCoordinate.vue'
+import { type Form, type numFloat, type Nullable } from '@/models/types.ts'
+type GeoCoordinateType = InstanceType<typeof GeoCoordinate>
 
-const props = defineProps({
-  labelText: String,
-  initialForm: String,
-});
+const props = defineProps<{
+  labelText: string
+  initialForm: Form
+}>()
 
-const whichForm = ref(props.initialForm);
+const whichForm: Ref<Form> = ref(props.initialForm)
 
-const latCom = useTemplateRef("lat");
-const lonCom = useTemplateRef("lon");
+const latCom = useTemplateRef<GeoCoordinateType>('lat')
+const lonCom = useTemplateRef('lon')
 
-function getPosition() {
-  const lat = latCom.value.getCoordinate();
-  const lon = lonCom.value.getCoordinate();
+function getPosition(): Nullable<GeoPoint> {
+  const lat = latCom.value?.getCoordinate()
+  const lon = lonCom.value?.getCoordinate()
 
   if (lat === null || lon === null) {
-    return null;
+    return null
   }
 
-  return new GeoPoint(lat, lon);
+  return new GeoPoint(lat as numFloat, lon as numFloat)
 }
 
 watch(whichForm, (newWhichForm) => {
-  latCom.value.changeWhichForm(newWhichForm);
-  lonCom.value.changeWhichForm(newWhichForm);
-});
+  latCom.value?.changeWhichForm(newWhichForm)
+  lonCom.value?.changeWhichForm(newWhichForm)
+})
 
-defineExpose({ getPosition });
+defineExpose({ getPosition })
 </script>
 
 <template>
@@ -73,16 +76,8 @@ defineExpose({ getPosition });
       <div class="coordinate-label">
         <label>{{ labelText }}:</label>
       </div>
-      <GeoCoordinate
-        ref="lat"
-        which-axis="lat"
-        :initial-form="props.initialForm"
-      />
-      <GeoCoordinate
-        ref="lon"
-        which-axis="lon"
-        :initial-form="props.initialForm"
-      />
+      <GeoCoordinate ref="lat" which-axis="lat" :initial-form="props.initialForm" />
+      <GeoCoordinate ref="lon" which-axis="lon" :initial-form="props.initialForm" />
     </div>
   </div>
 </template>

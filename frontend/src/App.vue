@@ -7,75 +7,83 @@
   Functionality:
   - Uses two `GeoInput` components to collect and validate input for Point A and Point B.
   - Sends the validated coordinates as query parameters to a backend API to compute distance.
-  - Displays the result in both meters and kilometers, or appropriate error messages if inputs are invalid.
+  - Displays the result in both meters and kilometers, or appropriate error messages if inputs are
+    invalid.
   - Supports coordinate entry in decimal degrees, degrees-minutes, or degrees-minutes-seconds.
 -->
 
-<script setup>
-import { useTemplateRef, ref } from "vue";
-import GeoInput from "@/components/GeoInput.vue";
+<script setup lang="ts">
+import { useTemplateRef, ref } from 'vue'
+import type { Ref } from 'vue'
+import GeoInput from '@/components/GeoInput.vue'
+import type { numInt } from './models/types'
+import type GeoPoint from './models/geo_point'
 
-const geoInputA = useTemplateRef("point-a");
-const geoInputB = useTemplateRef("point-b");
-const showDistance = ref(false);
-const loading = ref(false);
-const distance = ref(0);
+const geoInputA = useTemplateRef('point-a')
+const geoInputB = useTemplateRef('point-b')
+const showDistance: Ref<boolean> = ref(false)
+const loading: Ref<boolean> = ref(false)
+const distance: Ref<numInt> = ref(0)
 
-const fatalError = ref(false);
+const fatalError: Ref<boolean> = ref(false)
 
-function displayDistans(responseText) {
-  if (responseText == "error") {
-    fatalError.value = true;
-    return;
+function displayDistans(responseText: string): void {
+  if (responseText == 'error') {
+    fatalError.value = true
+    return
   }
-  let receivedDistance = parseInt(responseText);
+  let receivedDistance = parseInt(responseText)
   if (isNaN(receivedDistance)) {
-    fatalError.value = true;
-    return;
+    fatalError.value = true
+    return
   }
 
-  distance.value = receivedDistance;
-  showDistance.value = true;
-  loading.value = false;
+  distance.value = receivedDistance
+  showDistance.value = true
+  loading.value = false
 }
 
-function sendToCalculate() {
-  let pointA = geoInputA.value.getPosition();
+function sendToCalculate(): void {
+  let pointA = geoInputA.value?.getPosition()
   if (pointA === null) {
-    showDistance.value = false;
+    showDistance.value = false
   }
-  let pointB = geoInputB.value.getPosition();
+  let pointB = geoInputB.value?.getPosition()
   if (pointB === null) {
-    showDistance.value = false;
+    showDistance.value = false
   }
 
   if (pointA === null || pointB === null) {
-    return;
+    return
   }
 
-  loading.value = true;
-  showDistance.value = false;
-  distance.value = -1;
+  loading.value = true
+  showDistance.value = false
+  distance.value = -1
 
-  const params = `lat-a=${pointA.lat}&lon-a=${pointA.lon}&lat-b=${pointB.lat}&lon-b=${pointB.lon}`;
-  const url = `/api/calculate.php?${params}`;
-  const request = new XMLHttpRequest();
+  const params = `lat-a=${(pointA as GeoPoint).lat}`+
+                 `&lon-a=${(pointA as GeoPoint).lon}`+
+                 `&lat-b=${(pointB as GeoPoint).lat}`+
+                 `&lon-b=${(pointB as GeoPoint).lon}`;
+
+  const url = `/api/calculate.php?${params}`
+  const request = new XMLHttpRequest()
 
   request.onerror = function () {
-    this.abort();
-    fatalError.value = true;
-  };
+    this.abort()
+    fatalError.value = true
+  }
   request.onload = function () {
     if (this.status < 200 || this.status > 299) {
-      this.abort();
-      fatalError.value = true;
+      this.abort()
+      fatalError.value = true
     } else {
-      displayDistans(this.responseText);
+      displayDistans(this.responseText)
     }
-  };
+  }
 
-  request.open("GET", url, true);
-  request.send();
+  request.open('GET', url, true)
+  request.send()
 }
 </script>
 
@@ -104,10 +112,9 @@ function sendToCalculate() {
     </div>
     <div class="info-note">
       <p>
-        You can use <strong>d</strong>, <strong>D</strong>, or
-        <strong>°</strong> for degrees; <strong>m</strong>, <strong>M</strong>,
-        or <strong>"</strong> for minutes; and <strong>s</strong>,
-        <strong>S</strong>, or <strong>'</strong> for seconds.
+        You can use <strong>d</strong>, <strong>D</strong>, or <strong>°</strong> for degrees;
+        <strong>m</strong>, <strong>M</strong>, or <strong>"</strong> for minutes; and
+        <strong>s</strong>, <strong>S</strong>, or <strong>'</strong> for seconds.
         <strong>Spaces are optional.</strong>
       </p>
     </div>
